@@ -1,0 +1,1 @@
+Place approved portrait at assets/images/babs-portrait.jpg. Add approved gallery photographs under assets/images/gallery/ with descriptive filenames and captions.
