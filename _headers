@@ -1,14 +1,15 @@
-# ==========================================================================
-# BABS | Babatunde Sunday Ogunlade Official Website
-# _headers (Cloudflare Pages static headers)
-# Place in the repository root, next to index.html. No file extension.
-# ==========================================================================
+# Admin path: allow same-origin framing for CMS integrations while blocking external frames.
+/admin/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
 
+# Site-wide fallback security headers.
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
-  Strict-Transport-Security: max-age=31536000; includeSubDomains
   Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
   Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()
   Cross-Origin-Opener-Policy: same-origin
   X-Permitted-Cross-Domain-Policies: none
