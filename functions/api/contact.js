@@ -1,12 +1,12 @@
 /* ==========================================================================
-   BABS | Babatunde Sunday Ogunlade Official Website
+   Hon. Babatunde Sunday Ogunlade (BABS) | Official Website
    functions/api/contact.js
    Cloudflare Pages Function: POST /api/contact
 
    Required environment variables (Cloudflare Pages > Settings >
    Variables and Secrets):
      RESEND_API_KEY      (Secret)  API key from resend.com
-     CONTACT_TO_EMAIL    (Text)    Inbox that receives the messages
+     CONTACT_TO_EMAIL    (Text)    Inbox that receives the sign-ups
      CONTACT_FROM_EMAIL  (Text)    Verified sender, e.g.
                                    BABS Website <website@babatundeogunlade.com>
    ========================================================================== */
@@ -16,11 +16,12 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_PATTERN = /^[+()\d][\d\s().-]{6,19}$/;
 
 const INTERESTS = {
-  volunteer: 'Volunteer my time',
-  events: 'Help with events and town halls',
-  youth: 'Youth and student mobilisation',
-  media: 'Media and communications',
-  general: 'General enquiry'
+  volunteer: 'Volunteer',
+  media: 'Media & Publicity',
+  logistics: 'Logistics',
+  youth: 'Youth Mobilization',
+  farming: 'Farming Sector Policy',
+  other: 'Other'
 };
 
 /* ---------- Helpers ---------- */
@@ -69,43 +70,53 @@ function buildHtmlEmail(data, interestLabel, receivedAt) {
   var row = function (label, value) {
     return (
       '<tr>' +
-      '<td style="padding:10px 14px;font-weight:700;color:#0B1B3D;background:#f8fafc;border-bottom:1px solid #e2e8f0;width:140px;vertical-align:top;">' + label + '</td>' +
+      '<td style="padding:10px 14px;font-weight:700;color:#0B1B3D;background:#f8fafc;border-bottom:1px solid #e2e8f0;width:150px;vertical-align:top;">' + label + '</td>' +
       '<td style="padding:10px 14px;color:#1F2421;border-bottom:1px solid #e2e8f0;">' + value + '</td>' +
       '</tr>'
     );
   };
 
+  var emailCell = data.email
+    ? '<a href="mailto:' + escapeHtml(data.email) + '" style="color:#0b5d34;">' + escapeHtml(data.email) + '</a>'
+    : 'Not provided';
+
+  var phoneCell = '<a href="tel:' + escapeHtml(data.phone.replace(/[^\d+]/g, '')) + '" style="color:#0b5d34;">' + escapeHtml(data.phone) + '</a>';
+
   return (
     '<div style="font-family:Montserrat,Arial,sans-serif;max-width:620px;margin:0 auto;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">' +
     '<div style="background:#0b5d34;padding:20px 24px;">' +
-    '<h1 style="margin:0;font-size:20px;color:#f5b301;">New message from babatundeogunlade.com</h1>' +
+    '<h1 style="margin:0;font-size:20px;color:#f5b301;">New Team Babs sign-up</h1>' +
     '</div>' +
     '<table style="width:100%;border-collapse:collapse;font-size:14px;">' +
     row('Name', escapeHtml(data.fullname)) +
-    row('Email', '<a href="mailto:' + escapeHtml(data.email) + '" style="color:#0b5d34;">' + escapeHtml(data.email) + '</a>') +
-    row('Phone', data.phone ? escapeHtml(data.phone) : 'Not provided') +
-    row('Interest', escapeHtml(interestLabel)) +
-    row('Message', escapeHtml(data.message).replace(/\n/g, '<br>')) +
+    row('Ward / Location', escapeHtml(data.ward)) +
+    row('Phone / WhatsApp', phoneCell) +
+    row('Email', emailCell) +
+    row('Area of interest', escapeHtml(interestLabel)) +
+    row('Message', data.message ? escapeHtml(data.message).replace(/\n/g, '<br>') : 'Not provided') +
     row('Consent', 'Agreed to be contacted') +
     row('Received', escapeHtml(receivedAt)) +
     '</table>' +
-    '<p style="margin:0;padding:14px 24px;font-size:12px;color:#64748b;background:#f8fafc;">Reply directly to this email to respond to the sender.</p>' +
+    '<p style="margin:0;padding:14px 24px;font-size:12px;color:#64748b;background:#f8fafc;">' +
+    (data.email ? 'Reply directly to this email to respond to the sender.' : 'No email was provided. Contact the sender by phone or WhatsApp.') +
+    '</p>' +
     '</div>'
   );
 }
 
 function buildTextEmail(data, interestLabel, receivedAt) {
   return [
-    'New message from babatundeogunlade.com',
+    'New Team Babs sign-up',
     '',
     'Name: ' + data.fullname,
-    'Email: ' + data.email,
-    'Phone: ' + (data.phone || 'Not provided'),
-    'Interest: ' + interestLabel,
+    'Ward / Location: ' + data.ward,
+    'Phone / WhatsApp: ' + data.phone,
+    'Email: ' + (data.email || 'Not provided'),
+    'Area of interest: ' + interestLabel,
     'Received: ' + receivedAt,
     '',
     'Message:',
-    data.message,
+    data.message || 'Not provided',
     '',
     'Consent: Agreed to be contacted'
   ].join('\n');
@@ -150,8 +161,9 @@ export async function onRequestPost(context) {
     // 4. Sanitise
     var data = {
       fullname: cleanLine(body.fullname, 100),
-      email: cleanLine(body.email, 254),
+      ward: cleanLine(body.ward, 100),
       phone: cleanLine(body.phone, 20),
+      email: cleanLine(body.email, 254),
       interest: cleanLine(body.interest, 30),
       message: cleanMultiline(body.message, 1000),
       consent: body.consent === true
@@ -160,10 +172,10 @@ export async function onRequestPost(context) {
     // 5. Validate (mirrors the checks in main.js)
     var errors = {};
     if (data.fullname.length < 2) errors.fullname = 'Please enter your full name.';
-    if (!EMAIL_PATTERN.test(data.email)) errors.email = 'Please enter a valid email address.';
-    if (data.phone && !PHONE_PATTERN.test(data.phone)) errors.phone = 'Please enter a valid phone number.';
+    if (data.ward.length < 2) errors.ward = 'Please enter your ward or location.';
+    if (!PHONE_PATTERN.test(data.phone)) errors.phone = 'Please enter a valid phone number.';
+    if (data.email && !EMAIL_PATTERN.test(data.email)) errors.email = 'Please enter a valid email address.';
     if (!Object.prototype.hasOwnProperty.call(INTERESTS, data.interest)) errors.interest = 'Please choose an option.';
-    if (data.message.length < 10) errors.message = 'Your message must be at least 10 characters.';
     if (!data.consent) errors.consent = 'Consent is required.';
 
     if (Object.keys(errors).length > 0) {
@@ -180,20 +192,24 @@ export async function onRequestPost(context) {
     var interestLabel = INTERESTS[data.interest];
     var receivedAt = new Date().toUTCString();
 
+    var emailPayload = {
+      from: env.CONTACT_FROM_EMAIL,
+      to: [env.CONTACT_TO_EMAIL],
+      subject: 'Team Babs sign-up: ' + data.fullname + ' (' + interestLabel + ')',
+      html: buildHtmlEmail(data, interestLabel, receivedAt),
+      text: buildTextEmail(data, interestLabel, receivedAt)
+    };
+    if (data.email) {
+      emailPayload.reply_to = data.email;
+    }
+
     var emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + env.RESEND_API_KEY,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        from: env.CONTACT_FROM_EMAIL,
-        to: [env.CONTACT_TO_EMAIL],
-        reply_to: data.email,
-        subject: 'BABS website: ' + data.fullname + ' (' + interestLabel + ')',
-        html: buildHtmlEmail(data, interestLabel, receivedAt),
-        text: buildTextEmail(data, interestLabel, receivedAt)
-      }),
+      body: JSON.stringify(emailPayload),
       signal: AbortSignal.timeout(10000)
     });
 
