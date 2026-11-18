@@ -1,0 +1,7 @@
+backend:
+  name: github
+  repo: babsogunlade2027/babswebsite   # Your repository
+  branch: main                         # Production branch
+  # If using a Cloudflare worker OAuth proxy:
+  base_url: https://babatundeogunlade.com # Or your auth worker URL
+  auth_endpoint: auth
