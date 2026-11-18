@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BABS | Babatunde Sunday Ogunlade Official Website
+   Hon. Babatunde Sunday Ogunlade (BABS) | Official Website
    assets/js/main.js
    Vanilla JavaScript: navigation, smooth scrolling, scroll effects,
    form validation and submission feedback.
@@ -10,16 +10,15 @@
 
   /* ----------------------------------------------------------------------
      Configuration
-     FORM_ENDPOINT is where the volunteer/contact form POSTs JSON.
-     '/api/contact' is a same-origin Cloudflare Pages Function (works with
-     the CSP "connect-src 'self'"). Change it to another URL if you use a
-     third-party form service, and add that domain to connect-src in _headers.
+     FORM_ENDPOINT is a same-origin Cloudflare Pages Function
+     (functions/api/contact.js), allowed by the CSP "connect-src 'self'".
      ---------------------------------------------------------------------- */
   var CONFIG = {
     FORM_ENDPOINT: '/api/contact',
     REQUEST_TIMEOUT_MS: 15000,
     SCROLL_HEADER_OFFSET: 20,
-    BACK_TO_TOP_THRESHOLD: 500
+    BACK_TO_TOP_THRESHOLD: 500,
+    SUBMIT_TEXT: 'Join Team Babs'
   };
 
   /* ----------------------------------------------------------------------
@@ -185,7 +184,7 @@
      5. Scroll spy: highlight the nav link for the section in view
      ---------------------------------------------------------------------- */
   var navLinks = $all('.nav-link');
-  var sectionIds = ['home', 'about', 'manifesto', 'initiatives', 'news', 'volunteer'];
+  var sectionIds = ['home', 'about', 'vision', 'news', 'volunteer', 'contact'];
 
   function setActiveLink(id) {
     navLinks.forEach(function (link) {
@@ -239,7 +238,7 @@
   }
 
   /* ----------------------------------------------------------------------
-     7. Volunteer / contact form
+     7. Join Team Babs form
      ---------------------------------------------------------------------- */
   var form = $('#volunteer-form');
   var statusBox = $('#form-status');
@@ -259,28 +258,31 @@
       if (value.length < 2) return 'Your name must be at least 2 characters.';
       return '';
     },
-    email: function (field) {
+    ward: function (field) {
       var value = field.value.trim();
-      if (!value) return 'Please enter your email address.';
-      if (!EMAIL_PATTERN.test(value)) return 'Please enter a valid email address.';
+      if (!value) return 'Please tell us your ward or location in Ibarapa East.';
+      if (value.length < 2) return 'Please enter at least 2 characters.';
       return '';
     },
     phone: function (field) {
       var value = field.value.trim();
-      if (!value) return ''; // optional
+      if (!value) return 'Please enter your phone or WhatsApp number.';
       if (!PHONE_PATTERN.test(value)) return 'Please enter a valid phone number.';
       return '';
     },
+    email: function (field) {
+      var value = field.value.trim();
+      if (!value) return ''; // optional
+      if (!EMAIL_PATTERN.test(value)) return 'Please enter a valid email address.';
+      return '';
+    },
     interest: function (field) {
-      if (!field.value) return 'Please choose how you would like to help.';
+      if (!field.value) return 'Please choose an area of interest.';
       return '';
     },
     message: function (field) {
-      var value = field.value.trim();
-      if (!value) return 'Please write a short message.';
-      if (value.length < 10) return 'Your message must be at least 10 characters.';
-      if (value.length > 1000) return 'Your message must be 1000 characters or fewer.';
-      return '';
+      if (field.value.trim().length > 1000) return 'Your message must be 1000 characters or fewer.';
+      return ''; // optional
     },
     consent: function (field) {
       if (!field.checked) return 'Please tick this box so we can contact you.';
@@ -343,7 +345,7 @@
     submitBtn.disabled = isLoading;
     submitBtn.classList.toggle('is-loading', isLoading);
     submitBtn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
-    submitLabel.textContent = isLoading ? 'Sending' : 'Send Message';
+    submitLabel.textContent = isLoading ? 'Sending' : CONFIG.SUBMIT_TEXT;
   }
 
   function updateMessageCount() {
@@ -358,6 +360,7 @@
     $all('.form-input, input[type="checkbox"]', form).forEach(function (field) {
       field.classList.remove('is-invalid', 'is-valid');
       field.removeAttribute('aria-invalid');
+      delete field.dataset.touched;
     });
     $all('.field-error', form).forEach(function (el) {
       el.textContent = '';
@@ -368,8 +371,9 @@
   function buildPayload() {
     return {
       fullname: form.fullname.value.trim(),
-      email: form.email.value.trim(),
+      ward: form.ward.value.trim(),
       phone: form.phone.value.trim(),
+      email: form.email.value.trim(),
       interest: form.interest.value,
       message: form.message.value.trim(),
       consent: form.consent.checked,
@@ -452,25 +456,26 @@
       // Honeypot: bots fill the hidden field. Pretend success and stop.
       var honeypot = form.elements['website'];
       if (honeypot && honeypot.value) {
-        showStatus('success', 'Thank you! Your message has been received.');
+        showStatus('success', 'Welcome to Team Babs! Your details have been received.');
         resetFormState();
         return;
       }
 
+      var firstName = form.fullname.value.trim().split(/\s+/)[0];
       setLoading(true);
 
       sendForm(buildPayload())
         .then(function () {
           showStatus(
             'success',
-            'Thank you, ' + form.fullname.value.trim().split(/\s+/)[0] + '! Your message has been received. We will get back to you soon.'
+            'Welcome to Team Babs, ' + firstName + '! Your details have been received and the campaign team will reach out to you soon.'
           );
           resetFormState();
         })
         .catch(function () {
           showStatus(
             'error',
-            'Sorry, we could not send your message right now. Please check your connection and try again in a moment.'
+            'Sorry, we could not send your details right now. Please check your connection and try again in a moment.'
           );
         })
         .then(function () {
