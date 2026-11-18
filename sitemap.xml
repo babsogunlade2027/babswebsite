@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://fabulous-dieffenbachia-ee9855.netlify.app/</loc></url>
-<url><loc>https://fabulous-dieffenbachia-ee9855.netlify.app/about.html</loc></url>
-<url><loc>https://fabulous-dieffenbachia-ee9855.netlify.app/priorities.html</loc></url>
-<url><loc>https://fabulous-dieffenbachia-ee9855.netlify.app/press.html</loc></url>
-<url><loc>https://fabulous-dieffenbachia-ee9855.netlify.app/gallery.html</loc></url>
-<url><loc>https://fabulous-dieffenbachia-ee9855.netlify.app/contact.html</loc></url>
-<url><loc>https://fabulous-dieffenbachia-ee9855.netlify.app/privacy.html</loc></url>
+  <url>
+    <loc>https://babatundeogunlade.com/</loc>
+    <lastmod>2026-11-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
 </urlset>
