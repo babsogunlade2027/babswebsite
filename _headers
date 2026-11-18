@@ -1,23 +1,26 @@
-# Cloudflare Pages custom headers: place in the deploy root (same folder as index.html)
+# ==========================================================================
+# BABS | Babatunde Sunday Ogunlade Official Website
+# _headers (Cloudflare Pages static headers)
+# Place in the repository root, next to index.html. No file extension.
+# ==========================================================================
 
 /*
-  X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Strict-Transport-Security: max-age=31536000
-  # Report-Only first: check the browser console for violations, then rename to Content-Security-Policy
-  Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'none'
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  X-Permitted-Cross-Domain-Policies: none
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; manifest-src 'self'; upgrade-insecure-requests
 
-/images/*
-  Cache-Control: public, max-age=2592000
+# Static assets: cache for an hour, then revalidate (file names are not hashed)
+/assets/*
+  Cache-Control: public, max-age=3600, must-revalidate
 
-/css/*
-  Cache-Control: public, max-age=86400
+# HTML: always revalidate so updates go live immediately
+/
+  Cache-Control: public, max-age=0, must-revalidate
 
-/js/*
-  Cache-Control: public, max-age=86400
-
-# Keep the free *.pages.dev address out of search results (duplicate of the custom domain)
-https://:project.pages.dev/*
-  X-Robots-Tag: noindex
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
