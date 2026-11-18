@@ -1,7 +1,31 @@
 backend:
   name: github
-  repo: babsogunlade2027/babswebsite   # Your repository
+  repo: babsogunlade2027/babswebsite   # Your exact GitHub repository
   branch: main                         # Production branch
-  # If using a Cloudflare worker OAuth proxy:
-  base_url: https://babatundeogunlade.com # Or your auth worker URL
-  auth_endpoint: auth
+  base_url: https://babatundeogunlade.com # Your live site URL for OAuth redirection
+
+# Media files configuration (where uploaded images are stored)
+media_folder: "assets/img"
+public_folder: "/assets/img"
+
+collections:
+  - name: "news"
+    label: "News & Press Releases"
+    folder: "_posts/news" # Or your specific markdown storage directory
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Publish Date", name: "date", widget: "datetime"}
+      - {label: "Featured Image", name: "image", widget: "image", required: false}
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Body", name: "body", widget: "markdown"}
+
+  - name: "gallery"
+    label: "Gallery Entries"
+    folder: "_posts/gallery"
+    create: true
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Image", name: "image", widget: "image"}
+      - {label: "Caption", name: "caption", widget: "string", required: false}
