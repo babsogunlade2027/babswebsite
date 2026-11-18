@@ -1,3 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://fabulous-dieffenbachia-ee9855.netlify.app/sitemap.xml
+Disallow: /api/
+
+Sitemap: https://babatundeogunlade.com/sitemap.xml
