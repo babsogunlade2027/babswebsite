@@ -1,95 +1,486 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Babatunde Sunday Ogunlade (BABS) | Official Campaign Portal</title>
-    
-    <!-- SEO & Open Graph Standards -->
-    <meta name="description" content="Official campaign portal for Babatunde Sunday Ogunlade (BABS). Building a sustainable future through effective representation and progressive leadership.">
-    <meta property="og:title" content="Babatunde Sunday Ogunlade (BABS) | Official Campaign Portal">
-    <meta property="og:description" content="Join the movement for progressive leadership, community empowerment, and grassroots development.">
-    <meta property="og:image" content="https://babatundeogunlade.com/images/og-banner.jpg">
-    <meta property="og:url" content="https://babatundeogunlade.com">
-    <meta name="twitter:card" content="summary_large_image">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Babatunde Sunday Ogunlade (BABS) | Official Campaign &amp; Leadership Website</title>
+  <meta name="description" content="The official website of Babatunde Sunday Ogunlade (BABS): leadership built on integrity, grassroots empowerment and inclusive representation. Read the manifesto, follow the news and volunteer.">
+  <meta name="author" content="Babatunde Sunday Ogunlade">
+  <meta name="theme-color" content="#0b5d34">
+  <link rel="canonical" href="https://babatundeogunlade.com/">
 
-    <!-- Absolute Root Asset References -->
-    <link rel="stylesheet" href="/assets/css/style.css">
-    
-    <!-- Structured Data (JSON-LD) for Political Candidate -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Politician",
-      "name": "Babatunde Sunday Ogunlade",
-      "alternateName": "BABS",
-      "url": "https://babatundeogunlade.com",
-      "image": "https://babatundeogunlade.com/images/babs-hero.jpg",
-      "jobTitle": "Campaign Candidate",
-      "sameAs": [
-        "https://github.com/babsogunlade2027/babswebsite"
-      ]
-    }
-    </script>
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Babatunde Sunday Ogunlade (BABS)">
+  <meta property="og:title" content="Babatunde Sunday Ogunlade (BABS) | Official Website">
+  <meta property="og:description" content="Integrity. Grassroots Empowerment. Inclusive Representation. Join the movement.">
+  <meta property="og:url" content="https://babatundeogunlade.com/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Babatunde Sunday Ogunlade (BABS) | Official Website">
+  <meta name="twitter:description" content="Integrity. Grassroots Empowerment. Inclusive Representation. Join the movement.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS (pinned version) -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
-    <!-- Header & Navigation -->
-    <header class="site-header">
-        <div class="container nav-container">
-            <a href="/" class="logo">BABS 2027</a>
-            <nav class="nav-links">
-                <a href="#about">About</a>
-                <a href="#manifesto">Manifesto</a>
-                <a href="#volunteer" class="btn-primary">Join Volunteer</a>
-            </nav>
-        </div>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container hero-content">
-            <h1>Progressive Representation & Grassroots Development</h1>
-            <p>Committed to transparent leadership, community empowerment, and sustainable growth for our constituency.</p>
-            <div class="hero-actions">
-                <a href="#volunteer" class="btn-primary">Get Involved</a>
-                <a href="#manifesto" class="btn-secondary">Read Manifesto</a>
+<body class="font-sans bg-white text-slate-800 antialiased">
+
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- ===================== HEADER ===================== -->
+  <header id="site-header" class="glass-header fixed top-0 inset-x-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+
+        <!-- Logo -->
+        <a href="#home" class="flex items-center gap-3" aria-label="BABS home">
+          <span class="logo-mark flex items-center justify-center w-11 h-11 rounded-xl bg-[#0b5d34] text-[#f5b301] font-black text-lg tracking-tight shadow-lg">B</span>
+          <span class="leading-tight">
+            <span class="block font-extrabold text-lg text-[#0b5d34] tracking-wide">BABS</span>
+            <span class="block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Ogunlade</span>
+          </span>
+        </a>
+
+        <!-- Desktop nav -->
+        <nav class="hidden lg:flex items-center gap-8" aria-label="Primary">
+          <a href="#home" class="nav-link text-sm font-semibold text-slate-700 hover:text-[#0b5d34]">Home</a>
+          <a href="#about" class="nav-link text-sm font-semibold text-slate-700 hover:text-[#0b5d34]">About</a>
+          <a href="#manifesto" class="nav-link text-sm font-semibold text-slate-700 hover:text-[#0b5d34]">Manifesto</a>
+          <a href="#initiatives" class="nav-link text-sm font-semibold text-slate-700 hover:text-[#0b5d34]">Initiatives</a>
+          <a href="#news" class="nav-link text-sm font-semibold text-slate-700 hover:text-[#0b5d34]">News</a>
+          <a href="#volunteer" class="inline-flex items-center rounded-full bg-[#0b5d34] px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-[#08472886] hover:bg-[#084a29] transition">Volunteer</a>
+        </nav>
+
+        <!-- Hamburger -->
+        <button id="menu-toggle" type="button" class="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-lg text-[#0b5d34] hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0b5d34]" aria-controls="mobile-menu" aria-expanded="false" aria-label="Open menu">
+          <svg id="icon-open" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg id="icon-close" class="w-7 h-7 hidden" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="mobile-menu lg:hidden hidden border-t border-black/5">
+      <nav class="px-4 py-4 space-y-1" aria-label="Mobile">
+        <a href="#home" class="mobile-link block rounded-lg px-4 py-3 font-semibold text-slate-700 hover:bg-[#0b5d34]/10">Home</a>
+        <a href="#about" class="mobile-link block rounded-lg px-4 py-3 font-semibold text-slate-700 hover:bg-[#0b5d34]/10">About</a>
+        <a href="#manifesto" class="mobile-link block rounded-lg px-4 py-3 font-semibold text-slate-700 hover:bg-[#0b5d34]/10">Manifesto</a>
+        <a href="#initiatives" class="mobile-link block rounded-lg px-4 py-3 font-semibold text-slate-700 hover:bg-[#0b5d34]/10">Initiatives</a>
+        <a href="#news" class="mobile-link block rounded-lg px-4 py-3 font-semibold text-slate-700 hover:bg-[#0b5d34]/10">News</a>
+        <a href="#volunteer" class="mobile-link mt-2 block rounded-lg bg-[#0b5d34] px-4 py-3 text-center font-bold text-white">Volunteer</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ===================== HERO ===================== -->
+    <section id="home" class="hero-bg relative overflow-hidden pt-20">
+      <div class="hero-glow hero-glow-1" aria-hidden="true"></div>
+      <div class="hero-glow hero-glow-2" aria-hidden="true"></div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
+        <div class="max-w-3xl">
+          <div class="flex flex-wrap gap-2 mb-6 reveal">
+            <span class="badge">Integrity</span>
+            <span class="badge">Grassroots Empowerment</span>
+            <span class="badge">Inclusive Representation</span>
+          </div>
+
+          <h1 class="reveal text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.05] tracking-tight text-white">
+            Leadership You Can <span class="text-[#f5b301]">Trust.</span><br>
+            Progress You Can <span class="text-[#f5b301]">Feel.</span>
+          </h1>
+
+          <p class="reveal mt-6 text-base sm:text-lg lg:text-xl text-white/85 leading-relaxed max-w-2xl">
+            Babatunde Sunday Ogunlade (BABS) is committed to people-first governance: open, accountable and built from the grassroots up, so that every community is heard and every citizen counts.
+          </p>
+
+          <div class="reveal mt-10 flex flex-col sm:flex-row gap-4">
+            <a href="#volunteer" class="btn-primary inline-flex items-center justify-center rounded-full bg-[#f5b301] px-8 py-4 text-base font-extrabold text-[#06371e] shadow-xl hover:bg-[#ffc933] transition">
+              Join the Movement
+              <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a href="#manifesto" class="inline-flex items-center justify-center rounded-full border-2 border-white/70 px-8 py-4 text-base font-bold text-white hover:bg-white hover:text-[#0b5d34] transition">
+              Read the Manifesto
+            </a>
+          </div>
+        </div>
+
+        <!-- Hero stats -->
+        <dl class="reveal mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl">
+          <div class="stat-card"><dt class="stat-label">Pillar One</dt><dd class="stat-value">Economy</dd></div>
+          <div class="stat-card"><dt class="stat-label">Pillar Two</dt><dd class="stat-value">Education</dd></div>
+          <div class="stat-card"><dt class="stat-label">Pillar Three</dt><dd class="stat-value">Infrastructure</dd></div>
+          <div class="stat-card"><dt class="stat-label">Pillar Four</dt><dd class="stat-value">Healthcare</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ===================== ABOUT ===================== -->
+    <section id="about" class="py-20 sm:py-28 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center reveal">
+          <p class="section-eyebrow">About BABS</p>
+          <h2 class="section-title">A Leader Grounded in Service</h2>
+          <p class="mt-5 text-lg text-slate-600 leading-relaxed">
+            Babatunde Sunday Ogunlade believes leadership is measured by the lives it improves. His approach is simple: listen first, act with integrity, and put the community at the centre of every decision.
+          </p>
+        </div>
+
+        <div class="mt-16 grid gap-8 md:grid-cols-3">
+          <article class="card card-hover reveal">
+            <div class="icon-wrap">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
             </div>
+            <h3 class="card-title">Integrity</h3>
+            <p class="card-text">Honest, transparent and accountable leadership. Public trust is earned through consistent actions, open communication and respect for the rule of law.</p>
+          </article>
+
+          <article class="card card-hover reveal">
+            <div class="icon-wrap">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21V11m0 0c0-3 2-5 5-5 0 3-2 5-5 5zm0 3c0-2.5-1.7-4-4-4 0 2.5 1.7 4 4 4z"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 21h14"/></svg>
+            </div>
+            <h3 class="card-title">Grassroots Empowerment</h3>
+            <p class="card-text">Real development starts in the community. BABS champions skills, enterprise and opportunities that put power and prosperity directly in the hands of the people.</p>
+          </article>
+
+          <article class="card card-hover reveal">
+            <div class="icon-wrap">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.5c3 0 6 1.5 6 5.5"/></svg>
+            </div>
+            <h3 class="card-title">Inclusive Representation</h3>
+            <p class="card-text">Women, youth, elders and persons with disabilities deserve a seat at the table. Every voice matters, and every community should see itself in leadership.</p>
+          </article>
         </div>
+      </div>
     </section>
 
-    <!-- Volunteer Section -->
-    <section id="volunteer" class="volunteer-section">
-        <div class="container">
-            <h2>Join the Movement</h2>
-            <p>Sign up below to support the campaign and stay updated on our community outreaches.</p>
-            <form id="volunteer-form" class="volunteer-form">
-                <div class="form-group">
-                    <label for="fullname">Full Name</label>
-                    <input type="text" id="fullname" name="fullname" required placeholder="Enter your full name">
+    <!-- ===================== MANIFESTO ===================== -->
+    <section id="manifesto" class="py-20 sm:py-28 bg-slate-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center reveal">
+          <p class="section-eyebrow">The Manifesto</p>
+          <h2 class="section-title">Four Pillars for a Stronger Future</h2>
+          <p class="mt-5 text-lg text-slate-600 leading-relaxed">
+            A clear, people-centred plan focused on the priorities that matter most to families, workers, students and businesses.
+          </p>
+        </div>
+
+        <div class="mt-16 grid gap-8 sm:grid-cols-2">
+          <article class="pillar card-hover reveal">
+            <span class="pillar-number">01</span>
+            <div class="icon-wrap">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 7h6v6"/></svg>
+            </div>
+            <h3 class="card-title">Economic Growth</h3>
+            <ul class="check-list">
+              <li>Support small businesses, traders and artisans with access to finance and markets</li>
+              <li>Create jobs through agriculture, trade and local enterprise</li>
+              <li>Attract responsible investment and partnerships</li>
+            </ul>
+          </article>
+
+          <article class="pillar card-hover reveal">
+            <span class="pillar-number">02</span>
+            <div class="icon-wrap">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2 9l10-5 10 5-10 5L2 9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/></svg>
+            </div>
+            <h3 class="card-title">Education &amp; Youth</h3>
+            <ul class="check-list">
+              <li>Expand scholarships, skills training and digital literacy</li>
+              <li>Improve learning environments for pupils and teachers</li>
+              <li>Open pathways to mentorship, leadership and entrepreneurship</li>
+            </ul>
+          </article>
+
+          <article class="pillar card-hover reveal">
+            <span class="pillar-number">03</span>
+            <div class="icon-wrap">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 20L8 4M20 20L16 4M12 5v3m0 3v3m0 3v3"/></svg>
+            </div>
+            <h3 class="card-title">Infrastructure</h3>
+            <ul class="check-list">
+              <li>Prioritise roads, drainage, water and reliable electricity</li>
+              <li>Connect rural communities to markets and services</li>
+              <li>Deliver projects with transparency and community oversight</li>
+            </ul>
+          </article>
+
+          <article class="pillar card-hover reveal">
+            <span class="pillar-number">04</span>
+            <div class="icon-wrap">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-7-4.5-9-9.5C1.7 8 4 5 7 5c2 0 3.5 1 5 3 1.5-2 3-3 5-3 3 0 5.3 3 4 6.5-2 5-9 9.5-9 9.5z"/></svg>
+            </div>
+            <h3 class="card-title">Healthcare Access</h3>
+            <ul class="check-list">
+              <li>Strengthen primary healthcare centres in every community</li>
+              <li>Promote maternal, child and preventive health programmes</li>
+              <li>Make quality care more affordable and accessible</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== INITIATIVES ===================== -->
+    <section id="initiatives" class="py-20 sm:py-28 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center reveal">
+          <p class="section-eyebrow">Community Impact</p>
+          <h2 class="section-title">Initiatives That Put People First</h2>
+          <p class="mt-5 text-lg text-slate-600 leading-relaxed">
+            Leadership is action. These community-focused initiatives show how BABS turns values into visible, practical support.
+          </p>
+        </div>
+
+        <div class="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <article class="initiative card-hover reveal">
+            <div class="initiative-tag">Empowerment</div>
+            <h3 class="card-title">Youth &amp; Skills Development</h3>
+            <p class="card-text">Training, mentorship and enterprise support that prepare young people for real opportunities in the modern economy.</p>
+          </article>
+
+          <article class="initiative card-hover reveal">
+            <div class="initiative-tag">Inclusion</div>
+            <h3 class="card-title">Women's Economic Support</h3>
+            <p class="card-text">Backing women traders, farmers and entrepreneurs with access to resources, networks and market opportunities.</p>
+          </article>
+
+          <article class="initiative card-hover reveal">
+            <div class="initiative-tag">Health</div>
+            <h3 class="card-title">Community Health Outreach</h3>
+            <p class="card-text">Health awareness and outreach programmes that bring information and care closer to the people who need it most.</p>
+          </article>
+
+          <article class="initiative card-hover reveal">
+            <div class="initiative-tag">Education</div>
+            <h3 class="card-title">Education Support Drive</h3>
+            <p class="card-text">Practical support for students, teachers and schools to help every child learn in a safe, encouraging environment.</p>
+          </article>
+
+          <article class="initiative card-hover reveal">
+            <div class="initiative-tag">Engagement</div>
+            <h3 class="card-title">Town Hall Conversations</h3>
+            <p class="card-text">Regular open meetings where residents share concerns directly and help shape priorities and solutions.</p>
+          </article>
+
+          <article class="initiative card-hover reveal">
+            <div class="initiative-tag">Welfare</div>
+            <h3 class="card-title">Elders &amp; Vulnerable Support</h3>
+            <p class="card-text">Compassionate programmes that stand with the elderly, persons with disabilities and families in need.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== NEWS ===================== -->
+    <section id="news" class="py-20 sm:py-28 bg-slate-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 reveal">
+          <div class="max-w-2xl">
+            <p class="section-eyebrow">Latest News</p>
+            <h2 class="section-title text-left">Press Releases &amp; Updates</h2>
+            <p class="mt-4 text-lg text-slate-600">Stay informed with the latest statements, events and community highlights.</p>
+          </div>
+          <a href="#volunteer" class="inline-flex items-center font-bold text-[#0b5d34] hover:text-[#084a29]">
+            Get involved
+            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+
+        <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <article class="news-card card-hover reveal">
+            <div class="news-thumb news-thumb-1" aria-hidden="true"></div>
+            <div class="p-6">
+              <span class="news-meta">Press Release</span>
+              <h3 class="mt-3 text-xl font-extrabold text-slate-900 leading-snug">BABS Outlines a People-First Vision for Community Development</h3>
+              <p class="mt-3 text-slate-600 leading-relaxed">A statement on priorities for jobs, education, infrastructure and healthcare, and the commitment to listen before acting.</p>
+              <a href="#volunteer" class="read-more">Read more <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </article>
+
+          <article class="news-card card-hover reveal">
+            <div class="news-thumb news-thumb-2" aria-hidden="true"></div>
+            <div class="p-6">
+              <span class="news-meta">Community</span>
+              <h3 class="mt-3 text-xl font-extrabold text-slate-900 leading-snug">Town Hall Conversations Bring Residents and Leaders Together</h3>
+              <p class="mt-3 text-slate-600 leading-relaxed">Open dialogue sessions give residents a direct line to share concerns and contribute practical ideas.</p>
+              <a href="#volunteer" class="read-more">Read more <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </article>
+
+          <article class="news-card card-hover reveal">
+            <div class="news-thumb news-thumb-3" aria-hidden="true"></div>
+            <div class="p-6">
+              <span class="news-meta">Youth</span>
+              <h3 class="mt-3 text-xl font-extrabold text-slate-900 leading-snug">Youth Empowerment Takes Centre Stage in the BABS Agenda</h3>
+              <p class="mt-3 text-slate-600 leading-relaxed">Skills, mentorship and enterprise support are central to building opportunity for the next generation.</p>
+              <a href="#volunteer" class="read-more">Read more <span aria-hidden="true">&rarr;</span></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== VOLUNTEER / CONTACT ===================== -->
+    <section id="volunteer" class="py-20 sm:py-28 bg-[#0b5d34] relative overflow-hidden">
+      <div class="hero-glow hero-glow-2" aria-hidden="true"></div>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-12 lg:grid-cols-2 lg:gap-16 items-start">
+
+          <div class="reveal text-white">
+            <p class="text-sm font-bold uppercase tracking-[0.2em] text-[#f5b301]">Volunteer &amp; Contact</p>
+            <h2 class="mt-3 text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">Be Part of the Change</h2>
+            <p class="mt-5 text-lg text-white/85 leading-relaxed">
+              Every great movement is built by ordinary people who decide to act. Volunteer your time, share your ideas or send a message. We will get back to you.
+            </p>
+            <ul class="mt-8 space-y-4">
+              <li class="flex items-start gap-3"><span class="bullet-dot"></span><span class="text-white/90">Join community outreach and mobilisation teams</span></li>
+              <li class="flex items-start gap-3"><span class="bullet-dot"></span><span class="text-white/90">Support events, town halls and youth programmes</span></li>
+              <li class="flex items-start gap-3"><span class="bullet-dot"></span><span class="text-white/90">Share ideas for stronger communities</span></li>
+            </ul>
+          </div>
+
+          <div class="reveal bg-white rounded-3xl shadow-2xl p-6 sm:p-10">
+            <h3 class="text-2xl font-extrabold text-slate-900">Send Us a Message</h3>
+            <p class="mt-1 text-sm text-slate-500">Fields marked <span class="text-red-600 font-bold">*</span> are required.</p>
+
+            <div id="form-status" class="form-status hidden mt-6" role="status" aria-live="polite" tabindex="-1"></div>
+
+            <form id="volunteer-form" class="mt-6 space-y-5" novalidate>
+              <!-- Honeypot (hidden from real users) -->
+              <div class="sr-only" aria-hidden="true">
+                <label for="website">Leave this field empty</label>
+                <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+              </div>
+
+              <div>
+                <label for="fullname" class="form-label">Full Name <span class="text-red-600">*</span></label>
+                <input type="text" id="fullname" name="fullname" class="form-input" autocomplete="name" placeholder="Your full name" required minlength="2" aria-describedby="fullname-error">
+                <p id="fullname-error" class="field-error" data-error-for="fullname"></p>
+              </div>
+
+              <div class="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label for="email" class="form-label">Email Address <span class="text-red-600">*</span></label>
+                  <input type="email" id="email" name="email" class="form-input" autocomplete="email" placeholder="you@example.com" required aria-describedby="email-error">
+                  <p id="email-error" class="field-error" data-error-for="email"></p>
                 </div>
-                <div class="form-group">
-                    <label for="phone">Phone Number (WhatsApp)</label>
-                    <input type="tel" id="phone" name="phone" required placeholder="080XXXXXXXX">
+                <div>
+                  <label for="phone" class="form-label">Phone Number</label>
+                  <input type="tel" id="phone" name="phone" class="form-input" autocomplete="tel" placeholder="e.g. 0801 234 5678" aria-describedby="phone-error">
+                  <p id="phone-error" class="field-error" data-error-for="phone"></p>
                 </div>
-                <div class="form-group">
-                    <label for="ward">Ward / Location</label>
-                    <input type="text" id="ward" name="ward" required placeholder="Enter your ward or area">
+              </div>
+
+              <div>
+                <label for="interest" class="form-label">How would you like to help? <span class="text-red-600">*</span></label>
+                <select id="interest" name="interest" class="form-input" required aria-describedby="interest-error">
+                  <option value="">Select an option</option>
+                  <option value="volunteer">Volunteer my time</option>
+                  <option value="events">Help with events and town halls</option>
+                  <option value="youth">Youth and student mobilisation</option>
+                  <option value="media">Media and communications</option>
+                  <option value="general">General enquiry</option>
+                </select>
+                <p id="interest-error" class="field-error" data-error-for="interest"></p>
+              </div>
+
+              <div>
+                <label for="message" class="form-label">Your Message <span class="text-red-600">*</span></label>
+                <textarea id="message" name="message" rows="4" class="form-input resize-y" placeholder="Tell us how you would like to be involved..." required minlength="10" maxlength="1000" aria-describedby="message-error"></textarea>
+                <div class="flex justify-between">
+                  <p id="message-error" class="field-error" data-error-for="message"></p>
+                  <span id="message-count" class="text-xs text-slate-400 mt-1">0 / 1000</span>
                 </div>
-                <button type="submit" class="btn-primary full-width">Register as Volunteer</button>
+              </div>
+
+              <div>
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" id="consent" name="consent" class="mt-1 w-5 h-5 rounded border-slate-300 text-[#0b5d34] focus:ring-[#0b5d34]" required aria-describedby="consent-error">
+                  <span class="text-sm text-slate-600">I agree to be contacted about campaign activities and updates. <span class="text-red-600">*</span></span>
+                </label>
+                <p id="consent-error" class="field-error" data-error-for="consent"></p>
+              </div>
+
+              <button type="submit" id="submit-btn" class="btn-primary w-full inline-flex items-center justify-center rounded-full bg-[#0b5d34] px-8 py-4 text-base font-extrabold text-white shadow-lg hover:bg-[#084a29] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#0b5d34]/30 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                <span id="submit-label">Send Message</span>
+              </button>
             </form>
-            <div id="form-message" class="form-message"></div>
+          </div>
+
         </div>
+      </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2027 Babatunde Sunday Ogunlade Campaign Organization. All rights reserved.</p>
-        </div>
-    </footer>
+  </main>
 
-    <!-- JavaScript Bundle with Supabase & Form Handling -->
-    <script src="/assets/js/config.js"></script>
-    <script src="/assets/js/main.js"></script>
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="bg-[#06371e] text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <div class="grid gap-10 md:grid-cols-3">
+
+        <div>
+          <a href="#home" class="flex items-center gap-3" aria-label="BABS home">
+            <span class="logo-mark flex items-center justify-center w-11 h-11 rounded-xl bg-[#f5b301] text-[#06371e] font-black text-lg">B</span>
+            <span class="font-extrabold text-xl tracking-wide">BABS</span>
+          </a>
+          <p class="mt-4 text-sm text-white/70 leading-relaxed max-w-xs">
+            Babatunde Sunday Ogunlade: integrity, grassroots empowerment and inclusive representation for every community.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-bold uppercase tracking-[0.18em] text-[#f5b301]">Quick Links</h4>
+          <ul class="mt-4 space-y-2 text-sm">
+            <li><a href="#about" class="footer-link">About</a></li>
+            <li><a href="#manifesto" class="footer-link">Manifesto</a></li>
+            <li><a href="#initiatives" class="footer-link">Initiatives</a></li>
+            <li><a href="#news" class="footer-link">News</a></li>
+            <li><a href="#volunteer" class="footer-link">Volunteer</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-bold uppercase tracking-[0.18em] text-[#f5b301]">Follow BABS</h4>
+          <div class="mt-4 flex gap-3">
+            <a href="https://facebook.com/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Facebook">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-8h2.7l.4-3.2h-3.1V7.8c0-.9.3-1.5 1.6-1.5h1.6V3.4c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.5-4 4.1v2.4H7.5V13h2.8v8h3.2z"/></svg>
+            </a>
+            <a href="https://x.com/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="X (Twitter)">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 3h3.1l-6.8 7.7L21.8 21h-6.2l-4.9-6.3L5.1 21H2l7.2-8.3L2.2 3h6.4l4.4 5.8L17.5 3zm-1.1 16.2h1.7L7.7 4.7H5.9l10.5 14.5z"/></svg>
+            </a>
+            <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+            </a>
+            <a href="https://youtube.com/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="YouTube">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 00-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 002.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 001.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 001.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3-5.2 3z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs text-white/60">
+        <p>&copy; <span id="year">2026</span> Babatunde Sunday Ogunlade (BABS). All rights reserved.</p>
+        <p>Secure static hosting powered by <a href="https://pages.cloudflare.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-white">Cloudflare Pages</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to top -->
+  <button id="back-to-top" type="button" class="back-to-top" aria-label="Back to top">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </button>
+
+  <script src="assets/js/main.js" defer></script>
 </body>
 </html>
