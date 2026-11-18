@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#063d29"/><text x="32" y="40" font-family="Georgia,serif" font-size="24" font-weight="700" text-anchor="middle" fill="#d7b45a">B</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="BABS">
+  <rect width="64" height="64" rx="14" fill="#0b5d34"/>
+  <rect x="3" y="3" width="58" height="58" rx="11" fill="none" stroke="#f5b301" stroke-width="2" opacity="0.55"/>
+  <text x="32" y="45" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="38" font-weight="900" fill="#f5b301">B</text>
+</svg>
