@@ -19,7 +19,7 @@ The CMS configuration is admin/config.yml. News is stored in _posts/news and gal
 
 ## Production topology and release procedure
 
-The custom domain `babatundeogunlade.com` is attached to `babswebsite-preview`. That Worker currently serves repository files by fetching the `main` branch from `raw.githubusercontent.com`; it is not using the separate `babs07` static-assets Worker. The repository's `_headers` and `_redirects` files are therefore not automatically applied by the current proxy Worker. Equivalent security headers and route handling must be implemented in `worker.js`.
+The custom domain `babatundeogunlade.com` is attached to `babswebsite-preview`. That Worker currently serves repository files by fetching the `main` branch from `raw.githubusercontent.com`; it is not using the separate `babs07` static-assets Worker. The repository's `_headers` and `_redirects` files are therefore not automatically applied by the current proxy Worker. Equivalent security headers and route handling must be implemented in `worker.js`. The page-specific Content Security Policies are staged in report-only mode first; enforce them only after validating the Tailwind CDN and Decap CMS in real browsers.
 
 1. Review changes on a non-production branch and pass the repository quality checks.
 2. Verify desktop/mobile layout, links, images, SEO metadata, content feeds and CMS configuration.
