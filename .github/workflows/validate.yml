@@ -1,0 +1,30 @@
+name: Validate website JavaScript
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - main
+      - "audit/**"
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    name: JavaScript syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate Cloudflare Worker module
+        run: node --input-type=module --check < worker.js
+      - name: Validate secondary-page scripts
+        run: node --check assets/site.js
+      - name: Validate homepage script
+        run: node --check assets/js/main.js
