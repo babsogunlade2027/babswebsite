@@ -1,8 +1,9 @@
 backend:
   name: github
-  repo: babsogunlade2027/babswebsite   # Your exact GitHub repository
-  branch: main                         # Production branch
-  base_url: https://babatundeogunlade.com # Your live site URL for OAuth redirection
+  repo: babsogunlade2027/babswebsite
+  branch: main
+  base_url: https://<your-cloudflare-worker>.workers.dev
+  auth_endpoint: auth
 
 # Media files configuration (where uploaded images are stored)
 media_folder: "assets/img"
@@ -11,7 +12,7 @@ public_folder: "/assets/img"
 collections:
   - name: "news"
     label: "News & Press Releases"
-    folder: "_posts/news" # Or your specific markdown storage directory
+    folder: "_posts/news"
     create: true
     slug: "{{slug}}"
     fields:
