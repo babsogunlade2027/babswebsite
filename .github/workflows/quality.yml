@@ -22,7 +22,7 @@ jobs:
           node-version: "22"
       - name: Check JavaScript syntax
         run: |
-          node --check worker.js
+          node --check --input-type=module < worker.js
           node --check assets/site.js
           node --check assets/js/main.js
       - name: Validate pages, links and CMS safeguards
