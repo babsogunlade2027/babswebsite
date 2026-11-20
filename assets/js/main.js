@@ -183,7 +183,7 @@
   /* ----------------------------------------------------------------------
      5. Scroll spy: highlight the nav link for the section in view
      ---------------------------------------------------------------------- */
-  var navLinks = $all('.nav-link');
+  var navLinks = $all('.nav-link[href^="#"]');
   var sectionIds = ['home', 'about', 'vision', 'news', 'volunteer', 'contact'];
 
   function setActiveLink(id) {
