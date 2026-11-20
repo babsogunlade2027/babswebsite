@@ -65,3 +65,19 @@ form button:hover,.button:hover{background:var(--babs-navy);color:#fff;text-deco
 @media(max-width:1023px){.site-header>.wrap{min-height:70px}.menu-btn{display:block}.nav{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border-bottom:1px solid var(--babs-line);padding:12px 20px 18px;box-shadow:0 12px 20px #0b1b3d12;align-items:stretch;flex-direction:column;gap:0}.nav.is-open{display:flex}.nav a{padding:11px 4px}.split{grid-template-columns:1fr}.fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.wrap{width:min(100% - 30px,1160px)}.topbar .wrap{font-size:.68rem}.topbar .wrap span:last-child{display:none}.brand-text strong{font-size:.8rem}.brand-mark{width:42px;height:42px}.g2,.gal,.fgrid{grid-template-columns:1fr}.card{padding:18px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* CMS-backed public content */
+.news-list{display:grid;gap:18px}
+.news-item{padding:22px;background:#fff;border:1px solid var(--babs-line);border-radius:14px;box-shadow:0 8px 24px rgba(11,27,61,.04)}
+.news-item h3{margin:.35rem 0 .65rem;color:var(--babs-navy);font-size:1.18rem;line-height:1.35}
+.news-meta{font-size:.78rem;font-weight:700;letter-spacing:.04em;color:var(--babs-muted)}
+.news-summary,.news-body p{color:#4b5563;line-height:1.7}
+.news-details{margin-top:14px;border-top:1px solid var(--babs-line);padding-top:12px}
+.news-details summary{cursor:pointer;color:var(--babs-green);font-weight:800}
+.news-body{padding-top:10px}
+.news-body p{margin:.65rem 0}
+.gallery-card{margin:0;overflow:hidden;border:1px solid var(--babs-line);border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(11,27,61,.05)}
+.gallery-card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--babs-soft)}
+.gallery-card figcaption{display:grid;gap:4px;padding:14px 16px;color:var(--babs-navy)}
+.gallery-card figcaption span{font-size:.88rem;color:var(--babs-muted)}
+.gallery-empty[hidden]{display:none}
