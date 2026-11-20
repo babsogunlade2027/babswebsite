@@ -1,0 +1,29 @@
+name: Website quality checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - "audit/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JavaScript syntax
+        run: |
+          node --check worker.js
+          node --check assets/site.js
+          node --check assets/js/main.js
+      - name: Validate pages, links and CMS safeguards
+        run: node scripts/check-site.mjs
