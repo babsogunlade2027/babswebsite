@@ -1,19 +1,27 @@
-# Babatunde Ogunlade Website – Image Assets
+# BABS Website
 
-20 images, renamed to lowercase, hyphen-separated, descriptive filenames (web/GitHub friendly: no spaces, no special characters).
+Official public information and campaign website for Hon. Babatunde Sunday Ogunlade (BABS), Ibarapa East State Constituency, Oyo State.
 
-## Structure
-- `images/portraits/` – 5 portrait photos
-- `images/posters/` – 4 campaign posters
-- `images/campaign/` – 11 campaign and community event photos
-- `manifest.csv` – old filename → new path, plus suggested `alt` text
+## Project structure
+- `index.html` — public homepage
+- `about.html`, `priorities.html`, `press.html`, `gallery.html`, `contact.html`, `privacy.html` — public information pages
+- `assets/css/` and `assets/js/` — styles and browser scripts
+- `images/` — supplied portraits, posters and community photographs
+- `admin/` — Decap CMS interface and configuration
+- `_posts/news/` and `_posts/gallery/` — editorial content collections
+- `config/site-config.json` — central site and brand configuration
+- `docs/` — deployment and editorial guidance
+- `tests/` — release verification checklist
+- `worker.js` — Cloudflare Worker static repository proxy and CMS OAuth endpoints
 
-## Usage
-```html
-<img src="images/portraits/babatunde-ogunlade-portrait-traditional-red-attire.jpg" alt="Hon. Babatunde Ogunlade in red and cream traditional attire">
-```
+## Brand
+- Primary: deep green `#0b5d34`
+- Accent: gold `#f5b301`
+- Navy: `#0B1B3D`
+- Tagline: Building the Future. Empowering the People. Advancing Ibarapa East
 
-## Upload to GitHub
-1. Unzip, then copy the `images/` folder (and optionally this README) into your repository.
-2. `git add images && git commit -m "Add website images" && git push`
-Or use *Add file → Upload files* on GitHub and drag in the `images` folder.
+## Content integrity
+Proposed priorities must remain clearly distinguished from completed achievements. Do not invent claims, endorsements, figures or quotations. Public content requires editorial verification and approval.
+
+## CMS
+Visit `/admin/` and authenticate with an authorised GitHub account. See [Deployment Guide](docs/DEPLOYMENT.md).
