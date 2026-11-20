@@ -1,0 +1,7 @@
+{
+  "site":{"name":"Hon. Babatunde Sunday Ogunlade (BABS)","shortName":"BABS","url":"https://babatundeogunlade.com","locale":"en-NG","region":"Ibarapa East, Oyo State, Nigeria"},
+  "brand":{"primary":"#0b5d34","secondary":"#f5b301","navy":"#0B1B3D","text":"#1F2421","font":"Montserrat"},
+  "platform":{"repository":"babsogunlade2027/babswebsite","branch":"main","worker":"babswebsite-preview","cms":"/admin/"},
+  "messaging":{"tagline":"Building the Future. Empowering the People. Advancing Ibarapa East","focus":"Forward-thinking Opportunities for Community Unity and Sustainability","manifesto":"The Accelerated Pathway to Progress: The BABS Strategic Blueprint for Ibarapa East"},
+  "editorial":{"language":"British English","requireApproval":true,"distinguishProposalsFromAchievements":true,"doNotInventAchievements":true}
+}

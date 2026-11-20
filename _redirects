@@ -1,15 +1,2 @@
-# Cloudflare Pages redirects: place in the deploy root
-# Send www to the bare domain (www must be added as a custom domain on the Pages project)
+# Canonical host redirect. Configure both hostnames on the Cloudflare zone.
 https://www.babatundeogunlade.com/* https://babatundeogunlade.com/:splat 301
-
-# Note: Pages already serves clean URLs and redirects /about.html to /about automatically,
-# so do not add manual .html redirects (they can cause loops).
-/sitemap.xml
-  Cache-Control: public, max-age=3600, must-revalidate
-
-/robots.txt
-  Cache-Control: public, max-age=3600, must-revalidate
-
-/site.webmanifest
-  Content-Type: application/manifest+json; charset=utf-8
-  Cache-Control: public, max-age=3600, must-revalidate
