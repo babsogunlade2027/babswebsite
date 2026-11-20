@@ -28,6 +28,26 @@
       });
     });
   }
+  var contactForm=document.querySelector('form[name="contact"][data-mailto]');
+  if(contactForm){
+    contactForm.addEventListener("submit",function(event){
+      event.preventDefault();
+      if(!contactForm.reportValidity())return;
+      var data=new FormData(contactForm);
+      var recipient=contactForm.getAttribute("data-mailto");
+      var subject="Website enquiry: "+(data.get("topic")||"General enquiry");
+      var body=[
+        "Name: "+(data.get("name")||""),
+        "Email: "+(data.get("email")||""),
+        "Phone: "+(data.get("phone")||"Not provided"),
+        "Topic: "+(data.get("topic")||"General enquiry"),
+        "",
+        "Message:",
+        data.get("message")||""
+      ].join("\\n");
+      window.location.href="mailto:"+encodeURIComponent(recipient)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+    });
+  }
   document.querySelectorAll("[data-year]").forEach(function(node){
     node.textContent=String(new Date().getFullYear());
   });
