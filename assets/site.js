@@ -73,8 +73,8 @@
   }
 
   function formatPlainText(value) {
-    return String(value || "").trim().split(/\\n\\s*\\n/).filter(Boolean).map(function(paragraph) {
-      return "<p>" + escapeHtml(paragraph).replace(/\\n/g, "<br>") + "</p>";
+    return String(value || "").trim().split(/\n\s*\n/).filter(Boolean).map(function(paragraph) {
+      return "<p>" + escapeHtml(paragraph).replace(/\n/g, "<br>") + "</p>";
     }).join("");
   }
 
