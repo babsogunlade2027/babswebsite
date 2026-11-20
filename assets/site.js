@@ -2,11 +2,13 @@
   "use strict";
   var menuButton=document.querySelector(".menu-btn");
   var nav=document.querySelector(".nav");
-  var currentPath=window.location.pathname.replace(/\\/$/,"")||"/";
+  var currentPath=window.location.pathname||"/";
+  if(currentPath.length>1&&currentPath.endsWith("/"))currentPath=currentPath.slice(0,-1);
   if(currentPath==="/index.html")currentPath="/";
   document.querySelectorAll(".nav a, .mobile-link").forEach(function(link){
     try{
-      var targetPath=new URL(link.getAttribute("href"),window.location.origin).pathname.replace(/\\/$/,"")||"/";
+      var targetPath=new URL(link.getAttribute("href"),window.location.origin).pathname||"/";
+      if(targetPath.length>1&&targetPath.endsWith("/"))targetPath=targetPath.slice(0,-1);
       if(targetPath==="/index.html")targetPath="/";
       if(targetPath===currentPath)link.setAttribute("aria-current","page");
       else if(link.getAttribute("aria-current")==="page")link.removeAttribute("aria-current");
