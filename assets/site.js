@@ -2,6 +2,16 @@
   "use strict";
   var menuButton=document.querySelector(".menu-btn");
   var nav=document.querySelector(".nav");
+  var currentPath=window.location.pathname.replace(/\\/$/,"")||"/";
+  if(currentPath==="/index.html")currentPath="/";
+  document.querySelectorAll(".nav a, .mobile-link").forEach(function(link){
+    try{
+      var targetPath=new URL(link.getAttribute("href"),window.location.origin).pathname.replace(/\\/$/,"")||"/";
+      if(targetPath==="/index.html")targetPath="/";
+      if(targetPath===currentPath)link.setAttribute("aria-current","page");
+      else if(link.getAttribute("aria-current")==="page")link.removeAttribute("aria-current");
+    }catch(error){}
+  });
   if(menuButton&&nav){
     menuButton.addEventListener("click",function(){
       var open=nav.classList.toggle("is-open");
