@@ -1,5 +1,5 @@
 const REPOSITORY = "babsogunlade2027/babswebsite";
-const BRANCH = "site-reorganization-2026-11-20";
+const BRANCH = "main";
 const RAW_BASE = "https://raw.githubusercontent.com/" + REPOSITORY + "/" + BRANCH + "/";
 const STATE_COOKIE = "babs_decap_state";
 
