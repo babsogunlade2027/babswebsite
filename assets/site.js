@@ -44,7 +44,7 @@
         "",
         "Message:",
         data.get("message")||""
-      ].join("\\n");
+      ].join("\n");
       window.location.href="mailto:"+encodeURIComponent(recipient)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
     });
   }
