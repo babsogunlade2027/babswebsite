@@ -53,3 +53,7 @@ The production custom domain is attached to `babswebsite-preview`. The Worker cu
 
 ## Rollback
 Use the previous known-good Worker deployment version for rollback. Revert a Git commit rather than deleting files manually. Do not alter DNS or the separate `babs07` Worker as a routine rollback step.
+
+
+## Legacy hosting files
+The root `_headers` and `_redirects` files are not interpreted by the current Worker proxy. The production Worker implements the canonical `www` redirect and response security headers directly in `worker.js`. Keep these files only for historical/alternate static-hosting reference; do not rely on them for production controls.
