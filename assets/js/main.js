@@ -454,7 +454,6 @@
         return;
       }
 
-      var firstName = form.fullname.value.trim().split(/\s+/)[0];
       setLoading(true);
 
       sendForm(buildPayload())
