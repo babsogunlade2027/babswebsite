@@ -147,7 +147,7 @@ async function serveNotFound(isAdmin) {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=0, must-revalidate",
       "X-Frame-Options": isAdmin ? "SAMEORIGIN" : "DENY",
-      "Content-Security-Policy": isAdmin ? ADMIN_CSP : PUBLIC_CSP
+      "Content-Security-Policy-Report-Only": isAdmin ? ADMIN_CSP : PUBLIC_CSP
     };
     if (isAdmin) headers["X-Robots-Tag"] = "noindex, nofollow";
     return new Response(upstream.body, { status: 404, headers: baseHeaders(headers) });
@@ -169,7 +169,7 @@ async function serveFile(path, isAdmin) {
       "Cache-Control": isAdmin ? "no-store" : (candidate.endsWith(".html") ? "public, max-age=0, must-revalidate" : "public, max-age=300"),
       "X-Frame-Options": isAdmin ? "SAMEORIGIN" : "DENY"
     };
-    if (candidate.endsWith(".html")) extra["Content-Security-Policy"] = isAdmin ? ADMIN_CSP : PUBLIC_CSP;
+    if (candidate.endsWith(".html")) extra["Content-Security-Policy-Report-Only"] = isAdmin ? ADMIN_CSP : PUBLIC_CSP;
     if (isAdmin) extra["X-Robots-Tag"] = "noindex, nofollow";
     return new Response(upstream.body, { status: 200, headers: baseHeaders(extra) });
   }
