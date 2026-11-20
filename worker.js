@@ -4,7 +4,15 @@ const RAW_BASE = "https://raw.githubusercontent.com/" + REPOSITORY + "/" + BRANC
 const STATE_COOKIE = "babs_decap_state";
 
 function baseHeaders(extra = {}) {
-  return { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin", ...extra };
+  return {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+    "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    "X-Permitted-Cross-Domain-Policies": "none",
+    ...extra
+  };
 }
 function reply(body, status = 200, extra = {}) {
   return new Response(body, { status, headers: baseHeaders(extra) });
@@ -125,21 +133,123 @@ function mime(path) {
     ".webmanifest":"application/manifest+json; charset=utf-8",".woff2":"font/woff2",".pdf":"application/pdf"
   })[ext] || "application/octet-stream";
 }
+const PUBLIC_CSP = "default-src 'self'; script-src 'self' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests";
+const ADMIN_CSP = "default-src 'self'; script-src 'self' https://unpkg.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://api.github.com https://github.com https://raw.githubusercontent.com; frame-src 'self' https://github.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://github.com";
+
+async function serveNotFound(isAdmin) {
+  const target = RAW_BASE + "404.html";
+  const upstream = await fetch(target, {
+    headers: { Accept: "text/html", "User-Agent": "BABS-Cloudflare-Worker" },
+    cf: { cacheTtl: 60, cacheEverything: true }
+  });
+  if (upstream.ok) {
+    const headers = {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "public, max-age=0, must-revalidate",
+      "X-Frame-Options": isAdmin ? "SAMEORIGIN" : "DENY",
+      "Content-Security-Policy": isAdmin ? ADMIN_CSP : PUBLIC_CSP
+    };
+    if (isAdmin) headers["X-Robots-Tag"] = "noindex, nofollow";
+    return new Response(upstream.body, { status: 404, headers: baseHeaders(headers) });
+  }
+  return reply("Not found", 404, isAdmin ? privateHeaders({ "Content-Type": "text/plain; charset=utf-8" }) : { "Content-Type": "text/plain; charset=utf-8" });
+}
+
 async function serveFile(path, isAdmin) {
   for (const candidate of pathsFor(path)) {
     const target = RAW_BASE + candidate.split("/").map(encodeURIComponent).join("/");
-    const upstream = await fetch(target, { headers: { Accept: "*/*", "User-Agent": "BABS-Cloudflare-Worker" } });
+    const upstream = await fetch(target, {
+      headers: { Accept: "*/*", "User-Agent": "BABS-Cloudflare-Worker" },
+      cf: { cacheTtl: candidate.endsWith(".html") ? 60 : 300, cacheEverything: true }
+    });
     if (upstream.status === 404) continue;
     if (!upstream.ok) return reply("Website source temporarily unavailable.", 502, privateHeaders({ "Content-Type": "text/plain; charset=utf-8" }));
     const extra = {
       "Content-Type": mime(candidate),
-      "Cache-Control": isAdmin ? "no-store" : (candidate.endsWith(".html") ? "public, max-age=0, must-revalidate" : "public, max-age=300")
+      "Cache-Control": isAdmin ? "no-store" : (candidate.endsWith(".html") ? "public, max-age=0, must-revalidate" : "public, max-age=300"),
+      "X-Frame-Options": isAdmin ? "SAMEORIGIN" : "DENY"
     };
-    if (isAdmin) { extra["X-Robots-Tag"] = "noindex, nofollow"; extra["X-Frame-Options"] = "SAMEORIGIN"; }
-    else { extra["X-Frame-Options"] = "DENY"; }
+    if (candidate.endsWith(".html")) extra["Content-Security-Policy"] = isAdmin ? ADMIN_CSP : PUBLIC_CSP;
+    if (isAdmin) extra["X-Robots-Tag"] = "noindex, nofollow";
     return new Response(upstream.body, { status: 200, headers: baseHeaders(extra) });
   }
-  return reply("Not found", 404, isAdmin ? privateHeaders({ "Content-Type": "text/plain; charset=utf-8" }) : { "Content-Type": "text/plain; charset=utf-8" });
+  return serveNotFound(isAdmin);
+}
+
+function parseFrontMatter(source) {
+  const text = String(source || "");
+  if (!text.startsWith("---")) return { fields: {}, body: text.trim() };
+  const end = text.indexOf("\n---", 3);
+  if (end < 0) return { fields: {}, body: text.trim() };
+  const header = text.slice(3, end).replace(/^\r?\n/, "");
+  const lines = header.split(/\r?\n/);
+  const fields = {};
+  let activeKey = "";
+  for (const line of lines) {
+    const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
+    if (match) {
+      activeKey = match[1];
+      let value = match[2].trim();
+      if (value === "|" || value === ">") fields[activeKey] = "";
+      else fields[activeKey] = value.replace(/^(['"])(.*)\1$/, "$2");
+    } else if (activeKey && /^\s+/.test(line) && (fields[activeKey] === "")) {
+      fields[activeKey] += (fields[activeKey] ? "\n" : "") + line.trim();
+    }
+  }
+  return { fields, body: text.slice(end + 4).trim() };
+}
+
+async function fetchCached(url, ttl = 300, accept = "application/vnd.github+json") {
+  return fetch(url, {
+    headers: { Accept: accept, "User-Agent": "BABS-Cloudflare-Worker", "X-GitHub-Api-Version": "2022-11-28" },
+    cf: { cacheTtl: ttl, cacheEverything: true }
+  });
+}
+
+async function loadCollection(collection) {
+  const directory = "_posts/" + collection;
+  const listingUrl = "https://api.github.com/repos/" + REPOSITORY + "/contents/" + directory + "?ref=" + encodeURIComponent(BRANCH);
+  const listingResponse = await fetchCached(listingUrl, 300);
+  if (listingResponse.status === 404) return [];
+  if (!listingResponse.ok) throw new Error("Content listing unavailable");
+  const listing = await listingResponse.json();
+  if (!Array.isArray(listing)) return [];
+  const files = listing
+    .filter(item => item && item.type === "file" && typeof item.name === "string" && item.name.toLowerCase().endsWith(".md"))
+    .sort((a, b) => b.name.localeCompare(a.name))
+    .slice(0, 20);
+  const items = await Promise.all(files.map(async file => {
+    const rawUrl = RAW_BASE + directory + "/" + file.name.split("/").map(encodeURIComponent).join("/");
+    const response = await fetchCached(rawUrl, 300, "text/plain");
+    if (!response.ok) return null;
+    const parsed = parseFrontMatter(await response.text());
+    const fields = parsed.fields;
+    return {
+      slug: file.name.replace(/\.md$/i, ""),
+      title: fields.title || file.name.replace(/\.md$/i, "").replace(/[-_]/g, " "),
+      date: fields.date || "",
+      description: fields.description || fields.caption || "",
+      image: fields.image || "",
+      caption: fields.caption || "",
+      body: parsed.body
+    };
+  }));
+  return items.filter(Boolean).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+
+async function contentResponse(request, collection) {
+  if (request.method !== "GET") return reply("Method not allowed", 405, privateHeaders({ Allow: "GET" }));
+  try {
+    const items = await loadCollection(collection);
+    return reply(JSON.stringify({ items }), 200, privateHeaders({
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "public, max-age=300, s-maxage=300"
+    }));
+  } catch {
+    return reply(JSON.stringify({ error: "Published content is temporarily unavailable." }), 502, privateHeaders({
+      "Content-Type": "application/json; charset=utf-8"
+    }));
+  }
 }
 
 export default {
@@ -147,6 +257,8 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/api/auth") return startAuth(request, env);
     if (url.pathname === "/api/callback") return finishAuth(request, env);
+    if (url.pathname === "/api/content/news") return contentResponse(request, "news");
+    if (url.pathname === "/api/content/gallery") return contentResponse(request, "gallery");
     if (url.pathname.startsWith("/api/")) return reply("Not found", 404, privateHeaders({ "Content-Type": "text/plain; charset=utf-8" }));
     const path = resolvePath(url.pathname);
     if (path === null) return reply("Bad path", 400, privateHeaders({ "Content-Type": "text/plain; charset=utf-8" }));
