@@ -1317,3 +1317,6 @@ input[type='checkbox'].is-invalid {
   background: #eff6ff;
   border-left-color: #0b5d34;
 }
+
+/* Official BABS identity mark */
+.logo-mark{background:url('/babs-official-logo.svg') center/cover no-repeat!important;color:transparent!important;font-size:0!important;border-radius:50%!important;box-shadow:none!important;}
