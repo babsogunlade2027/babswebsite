@@ -10,15 +10,12 @@
 
   /* ----------------------------------------------------------------------
      Configuration
-     FORM_ENDPOINT is a same-origin Cloudflare Pages Function
-     (functions/api/contact.js), allowed by the CSP "connect-src 'self'".
      ---------------------------------------------------------------------- */
   var CONFIG = {
-    FORM_ENDPOINT: '/api/contact',
-    REQUEST_TIMEOUT_MS: 15000,
     SCROLL_HEADER_OFFSET: 20,
     BACK_TO_TOP_THRESHOLD: 500,
-    SUBMIT_TEXT: 'Join Team Babs'
+    SUBMIT_TEXT: 'Submit enquiry',
+    CONTACT_EMAIL: 'babstunde2008@gmail.com'
   };
 
   /* ----------------------------------------------------------------------
@@ -422,46 +419,6 @@
     updateMessageCount();
   }
 
-  function buildPayload() {
-    return {
-      fullname: form.fullname.value.trim(),
-      ward: form.ward.value.trim(),
-      phone: form.phone.value.trim(),
-      email: form.email.value.trim(),
-      interest: form.interest.value,
-      message: form.message.value.trim(),
-      consent: form.consent.checked,
-      page: window.location.href,
-      submittedAt: new Date().toISOString()
-    };
-  }
-
-  function sendForm(payload) {
-    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    var timer = controller
-      ? window.setTimeout(function () { controller.abort(); }, CONFIG.REQUEST_TIMEOUT_MS)
-      : null;
-
-    return fetch(CONFIG.FORM_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(payload),
-      signal: controller ? controller.signal : undefined
-    }).then(function (response) {
-      if (timer) window.clearTimeout(timer);
-      if (!response.ok) {
-        throw new Error('Request failed with status ' + response.status);
-      }
-      return response;
-    }, function (error) {
-      if (timer) window.clearTimeout(timer);
-      throw error;
-    });
-  }
-
   if (form) {
     var fields = $all('.form-input, input[type="checkbox"]', form).filter(function (field) {
       return field.name && field.name !== 'website';
@@ -515,26 +472,27 @@
         return;
       }
 
-      var firstName = form.fullname.value.trim().split(/\s+/)[0];
-      setLoading(true);
+      var subject = 'Website enquiry: Team Babs — ' + form.interest.options[form.interest.selectedIndex].text;
+      var body = [
+        'Name: ' + form.fullname.value.trim(),
+        'Ward / Location: ' + form.ward.value.trim(),
+        'Phone / WhatsApp: ' + form.phone.value.trim(),
+        'Email: ' + (form.email.value.trim() || 'Not provided'),
+        'Area of interest: ' + form.interest.options[form.interest.selectedIndex].text,
+        '',
+        'Message:',
+        form.message.value.trim() || 'Not provided',
+        '',
+        'Consent: Agreed to be contacted about this enquiry and relevant campaign updates.'
+      ].join('\n');
 
-      sendForm(buildPayload())
-        .then(function () {
-          showStatus(
-            'success',
-            'Welcome to Team Babs, ' + firstName + '! Your details have been received and the campaign team will reach out to you soon.'
-          );
-          resetFormState();
-        })
-        .catch(function () {
-          showStatus(
-            'error',
-            'Sorry, we could not send your details right now. Please check your connection and try again in a moment.'
-          );
-        })
-        .then(function () {
-          setLoading(false);
-        });
+      showStatus(
+        'info',
+        'Your email application should open with a prepared enquiry. Review the details and press Send to submit it. The website has not sent your information.'
+      );
+      window.location.href = 'mailto:' + encodeURIComponent(CONFIG.CONTACT_EMAIL) +
+        '?subject=' + encodeURIComponent(subject) +
+        '&body=' + encodeURIComponent(body);
     });
   }
 })();
