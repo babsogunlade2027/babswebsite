@@ -265,9 +265,9 @@
 
           var link = document.createElement('a');
           link.className = 'read-more';
-          link.href = '/press.html#news';
-          link.textContent = 'Read updates';
-          link.setAttribute('aria-label', 'Read more campaign updates in the Press Centre');
+          link.href = '/news/' + encodeURIComponent(item.slug || '') + '.html';
+          link.textContent = item.type === 'News Report' ? 'Read full report' : 'Read full release';
+          link.setAttribute('aria-label', 'Read: ' + (item.title || 'campaign update'));
 
           article.appendChild(meta);
           article.appendChild(title);
