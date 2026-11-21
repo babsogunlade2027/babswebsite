@@ -95,3 +95,19 @@ form button:hover,.button:hover{background:var(--babs-navy);color:#fff;text-deco
 .news-story-body p{font-size:.9rem;line-height:1.8;color:#394452}
 .news-story-body .news-source{margin-top:18px;padding-top:12px;border-top:1px solid var(--babs-line);font-size:.78rem;color:var(--babs-muted)}
 @media(max-width:760px){.news-grid{grid-template-columns:1fr}.newsroom-heading{align-items:start;flex-direction:column}.newsroom-total{display:flex;align-items:center;gap:10px;padding:10px 14px}.newsroom-total strong{font-size:1.3rem}.news-tools{grid-template-columns:1fr}.news-card{padding:18px}}
+
+
+/* Individual newsroom article pages */
+.article-breadcrumb{display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding-top:24px;font-size:.8rem;color:var(--babs-muted)}
+.article-breadcrumb a{font-weight:750}
+.article-shell{width:min(850px,calc(100% - 40px));margin:28px auto 80px}
+.article-label{display:inline-flex;padding:6px 11px;border-radius:999px;background:#e8f4ed;color:#145b35;font-size:.7rem;font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+.article-shell h1{margin:18px 0 14px;color:var(--babs-navy);font-size:clamp(2rem,4.5vw,3.35rem);line-height:1.16;letter-spacing:-.035em}
+.article-meta{display:flex;flex-wrap:wrap;gap:10px;align-items:center;color:var(--babs-muted);font-size:.82rem}
+.article-deck{margin:26px 0;padding:20px 22px;border-left:4px solid var(--babs-gold);background:var(--babs-soft);color:#354253;font-size:1.08rem;line-height:1.7}
+.article-content{max-width:760px}
+.article-content p{margin:0 0 1.2em;color:#344054;font-size:1rem;line-height:1.9}
+.article-content .article-source{margin-top:30px;padding-top:18px;border-top:1px solid var(--babs-line);color:var(--babs-muted);font-size:.84rem}
+.article-navigation{display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin-top:36px;padding-top:22px;border-top:1px solid var(--babs-line)}
+.article-contact{font-weight:800}
+@media(max-width:560px){.article-shell{width:calc(100% - 30px);margin-top:22px}.article-shell h1{font-size:2rem}.article-deck{padding:16px;font-size:1rem}.article-content p{font-size:.96rem}}
