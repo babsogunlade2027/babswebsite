@@ -91,12 +91,11 @@ if(newsList){
    top.appendChild(el("time","news-date",item.date));article.appendChild(top);
    article.appendChild(el("h3","news-title",item.title));
    article.appendChild(el("p","news-summary",item.summary));
-   var details=el("details","news-details"),summary=el("summary","news-read-more","Read full "+(item.type==="News Report"?"report":"release"));
-   details.appendChild(summary);
-   var content=el("div","news-story-body");
-   (item.body||[]).forEach(function(paragraph){content.appendChild(el("p","",paragraph));});
-   content.appendChild(el("p","news-source","Source: "+(item.source||"Campaign media desk.")));
-   details.appendChild(content);article.appendChild(details);newsList.appendChild(article);
+   var read=el("a","news-read-more","Read full "+(item.type==="News Report"?"report":"release"));
+   read.href="/news/"+encodeURIComponent(item.slug)+".html";
+   read.setAttribute("aria-label","Read "+item.title);
+   article.appendChild(read);
+   newsList.appendChild(article);
   });
   if(location.hash){var target=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(target&&target.classList.contains("news-card")){var d=target.querySelector("details");if(d)d.open=true;}}
  }
