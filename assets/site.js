@@ -72,8 +72,36 @@ var photos=[
 ];
 var gallery=document.getElementById("gallery");
 if(gallery){gallery.innerHTML=photos.map(function(p){return '<figure class="card"><img src="/'+p[0]+'" alt="'+p[1]+'" loading="lazy"><figcaption>'+p[1]+'</figcaption></figure>';}).join("");}
-var news=document.querySelector("[data-news]");
-if(news){fetch("/news/index.json").then(function(r){if(!r.ok)throw Error("News feed unavailable");return r.json();}).then(function(items){news.innerHTML='<div class="grid">'+items.map(function(n){return '<article class="card"><p class="kicker">'+n.type+' · '+n.date+'</p><h3>'+n.title+'</h3><p>'+n.summary+'</p></article>';}).join("")+'</div>';}).catch(function(){news.innerHTML='<p class="empty">News updates are temporarily unavailable. Please check again shortly.</p>';});}
+var newsList=document.getElementById("news-list");
+if(newsList){
+ var search=document.getElementById("news-search"),filter=document.getElementById("news-filter"),count=document.getElementById("news-count"),results=document.getElementById("news-results"),allArticles=[];
+ function el(tag,className,text){var node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
+ function renderNews(){
+  var term=(search.value||"").trim().toLowerCase(),kind=filter.value;
+  var visible=allArticles.filter(function(item){var hay=[item.title,item.summary,item.type,item.source].concat(item.body||[]).join(" ").toLowerCase();return (kind==="all"||item.type===kind)&&(!term||hay.indexOf(term)!==-1);});
+  visible.sort(function(a,b){return (b.iso||"").localeCompare(a.iso||"");});
+  newsList.textContent="";
+  if(count)count.textContent=String(visible.length);
+  if(results)results.textContent=visible.length+" "+(visible.length===1?"story":"stories")+" found";
+  if(!visible.length){newsList.appendChild(el("p","empty","No stories match your search. Try another keyword or select All updates."));return;}
+  visible.forEach(function(item){
+   var article=el("article","news-card");article.id="story-"+item.slug;
+   var top=el("div","news-card-top");
+   top.appendChild(el("span","news-type "+(item.type==="News Report"?"news-type-report":"news-type-release"),item.type==="News Report"?"News report":"Press release"));
+   top.appendChild(el("time","news-date",item.date));article.appendChild(top);
+   article.appendChild(el("h3","news-title",item.title));
+   article.appendChild(el("p","news-summary",item.summary));
+   var details=el("details","news-details"),summary=el("summary","news-read-more","Read full "+(item.type==="News Report"?"report":"release"));
+   details.appendChild(summary);
+   var content=el("div","news-story-body");
+   (item.body||[]).forEach(function(paragraph){content.appendChild(el("p","",paragraph));});
+   content.appendChild(el("p","news-source","Source: "+(item.source||"Campaign media desk.")));
+   details.appendChild(content);article.appendChild(details);newsList.appendChild(article);
+  });
+  if(location.hash){var target=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(target&&target.classList.contains("news-card")){var d=target.querySelector("details");if(d)d.open=true;}}
+ }
+ fetch("/news/articles.json",{headers:{"Accept":"application/json"}}).then(function(response){if(!response.ok)throw new Error("News archive unavailable");return response.json();}).then(function(items){if(!Array.isArray(items))throw new Error("Invalid newsroom data");allArticles=items;renderNews();if(search)search.addEventListener("input",renderNews);if(filter)filter.addEventListener("change",renderNews);}).catch(function(){newsList.textContent="";newsList.appendChild(el("p","empty","The newsroom is temporarily unavailable. Please try again later."));if(results)results.textContent="News archive unavailable";});
+}
 var hero=document.querySelector(".page-hero .wrap");
 if(hero&&!document.querySelector(".page-hero img")){var path=location.pathname;var chosen=path.indexOf("press")>=0?photos[2][0]:path.indexOf("priorities")>=0?photos[5][0]:path.indexOf("about")>=0?photos[0][0]:null;if(chosen){var img=document.createElement("img");img.src="/"+chosen;img.alt="BABS community engagement";img.loading="lazy";img.style.cssText="display:block;width:100%;max-height:330px;object-fit:cover;border-radius:14px;margin-top:24px";hero.appendChild(img);}}
 })();
