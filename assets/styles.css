@@ -111,3 +111,7 @@ form button:hover,.button:hover{background:var(--babs-navy);color:#fff;text-deco
 .article-navigation{display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin-top:36px;padding-top:22px;border-top:1px solid var(--babs-line)}
 .article-contact{font-weight:800}
 @media(max-width:560px){.article-shell{width:calc(100% - 30px);margin-top:22px}.article-shell h1{font-size:2rem}.article-deck{padding:16px;font-size:1rem}.article-content p{font-size:.96rem}}
+
+/* Official BABS identity mark */
+.brand-mark{background:url('/babs-official-logo.svg') center/cover no-repeat!important;border:0!important;border-radius:50%!important;color:transparent!important;font-size:0!important;box-shadow:none!important;}
+.brand-mark::before,.brand-mark::after{content:none!important}
