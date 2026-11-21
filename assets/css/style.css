@@ -1309,3 +1309,11 @@ input[type='checkbox'].is-invalid {
     transform: none;
   }
 }
+
+
+/* Informational form status: the visitor must review and send the prepared email. */
+.form-status.info {
+  color: #0B1B3D;
+  background: #eff6ff;
+  border-left-color: #0b5d34;
+}
