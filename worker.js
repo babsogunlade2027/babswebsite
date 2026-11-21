@@ -3,6 +3,36 @@ const BRANCH = "main";
 const RAW_BASE = "https://raw.githubusercontent.com/" + REPOSITORY + "/" + BRANCH + "/";
 const STATE_COOKIE = "babs_decap_state";
 
+const PUBLIC_CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https://raw.githubusercontent.com",
+  "connect-src 'self' https://api.github.com https://raw.githubusercontent.com",
+  "frame-src 'none'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "upgrade-insecure-requests"
+].join("; ");
+
+const ADMIN_CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https://avatars.githubusercontent.com https://raw.githubusercontent.com",
+  "connect-src 'self' https://api.github.com https://github.com https://unpkg.com https://raw.githubusercontent.com",
+  "frame-src 'self' https://github.com",
+  "frame-ancestors 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self' https://github.com",
+  "upgrade-insecure-requests"
+].join("; ");
+
 function baseHeaders(extra = {}) {
   return { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin", ...extra };
 }
@@ -35,6 +65,7 @@ function popup(status, payload, origin) {
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CMS authentication</title></head><body><p>Completing GitHub sign-in…</p><script>(function(){var m=${messageJs};var o=${originJs};if(window.opener){window.opener.postMessage(m,o);window.close();}})();</script></body></html>`;
   return reply(html, status === "success" ? 200 : 400, privateHeaders({
     "Content-Type": "text/html; charset=utf-8",
+    "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
     "Content-Security-Policy": "default-src 'none'; script-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'"
   }));
 }
@@ -135,8 +166,15 @@ async function serveFile(path, isAdmin) {
       "Content-Type": mime(candidate),
       "Cache-Control": isAdmin ? "no-store" : (candidate.endsWith(".html") ? "public, max-age=0, must-revalidate" : "public, max-age=300")
     };
-    if (isAdmin) { extra["X-Robots-Tag"] = "noindex, nofollow"; extra["X-Frame-Options"] = "SAMEORIGIN"; }
-    else { extra["X-Frame-Options"] = "DENY"; }
+    if (isAdmin) {
+      extra["X-Robots-Tag"] = "noindex, nofollow";
+      extra["X-Frame-Options"] = "SAMEORIGIN";
+      extra["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups";
+      extra["Content-Security-Policy"] = ADMIN_CSP;
+    } else {
+      extra["X-Frame-Options"] = "DENY";
+      extra["Content-Security-Policy"] = PUBLIC_CSP;
+    }
     return new Response(upstream.body, { status: 200, headers: baseHeaders(extra) });
   }
   return reply("Not found", 404, isAdmin ? privateHeaders({ "Content-Type": "text/plain; charset=utf-8" }) : { "Content-Type": "text/plain; charset=utf-8" });
