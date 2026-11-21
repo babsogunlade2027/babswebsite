@@ -14,7 +14,6 @@
   var CONFIG = {
     SCROLL_HEADER_OFFSET: 20,
     BACK_TO_TOP_THRESHOLD: 500,
-    SUBMIT_TEXT: 'Submit enquiry',
     CONTACT_EMAIL: 'babstunde2008@gmail.com'
   };
 
@@ -293,8 +292,6 @@
      ---------------------------------------------------------------------- */
   var form = $('#volunteer-form');
   var statusBox = $('#form-status');
-  var submitBtn = $('#submit-btn');
-  var submitLabel = $('#submit-label');
   var messageField = $('#message');
   var messageCount = $('#message-count');
 
@@ -389,14 +386,6 @@
     if (top < (header ? header.offsetHeight : 0) + 10 || top > window.innerHeight - 100) {
       scrollToTarget(statusBox);
     }
-  }
-
-  function setLoading(isLoading) {
-    if (!submitBtn || !submitLabel) return;
-    submitBtn.disabled = isLoading;
-    submitBtn.classList.toggle('is-loading', isLoading);
-    submitBtn.setAttribute('aria-busy', isLoading ? 'true' : 'false');
-    submitLabel.textContent = isLoading ? 'Sending' : CONFIG.SUBMIT_TEXT;
   }
 
   function updateMessageCount() {
