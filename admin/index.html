@@ -41,6 +41,7 @@
       <button class="nav-item" data-view="enquiries" id="enquiries-nav"><span class="nav-icon">✉</span>Enquiries</button>
       <button class="nav-item" data-view="profile" id="profile-nav"><span class="nav-icon">◎</span>Profile</button>
       <button class="nav-item" data-view="policies" id="policies-nav"><span class="nav-icon">▣</span>Policy priorities</button>
+      <button class="nav-item" data-view="press" id="press-nav"><span class="nav-icon">▤</span>Press releases</button>
       <button class="nav-item" data-view="navigation" id="navigation-nav"><span class="nav-icon">☷</span>Navigation</button>
       <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">☷</span>Navigation &amp; SEO <span class="soon">Next</span></div>
       <div class="sidebar-bottom">
@@ -109,6 +110,11 @@
             <div class="modal-actions full"><button class="button primary" type="submit">Save policy priority</button><button class="button secondary" type="reset">Clear form</button></div>
           </form></div>
           <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Priority</th><th>Slug</th><th>Status</th><th>Order</th><th></th></tr></thead><tbody id="policy-rows"><tr><td colspan="5" class="empty-cell">Loading priorities…</td></tr></tbody></table></div></div>
+        </section>
+        <section class="view" id="view-press" hidden>
+          <div class="page-heading"><div><p class="eyebrow">MEDIA RELATIONS</p><h1>Press release details</h1><p class="muted">Manage media contact information for articles in the Press Releases category.</p></div></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Release</th><th>Status</th><th>Published</th><th>Media contact</th><th></th></tr></thead><tbody id="press-rows"><tr><td colspan="5" class="empty-cell">Loading press releases…</td></tr></tbody></table></div></div>
+          <p class="notice">File attachments become available when Cloudflare R2 is enabled and the media library is provisioned.</p>
         </section>
         <section class="view" id="view-navigation" hidden>
           <div class="page-heading"><div><p class="eyebrow">PUBLIC WEBSITE</p><h1>Navigation manager</h1><p class="muted">Edit the primary navigation links. URLs must be site-relative or HTTPS.</p></div></div>
