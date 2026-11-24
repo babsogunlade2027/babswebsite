@@ -144,9 +144,27 @@ async function audit(env, actor, action, entityType, entityId, summary) {
     "INSERT INTO activity_logs (id,actor_id,action,entity_type,entity_id,summary) VALUES (?,?,?,?,?,?)"
   ).bind(crypto.randomUUID(), actor.id, action, entityType, entityId || null, summary).run();
 }
+async function allowAuthAttempt(request, env) {
+  if (!env.DB) return false;
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const key = await sha256(ip);
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000;
+  const row = await env.DB.prepare("SELECT window_started_at,attempts FROM auth_rate_limits WHERE key_hash=?").bind(key).first();
+  if (!row || now - new Date(row.window_started_at).getTime() >= windowMs) {
+    await env.DB.prepare("INSERT INTO auth_rate_limits (key_hash,window_started_at,attempts) VALUES (?,?,1) ON CONFLICT(key_hash) DO UPDATE SET window_started_at=excluded.window_started_at,attempts=1,updated_at=?")
+      .bind(key,new Date(now).toISOString(),new Date(now).toISOString()).run();
+    return true;
+  }
+  if (Number(row.attempts) >= 10) return false;
+  await env.DB.prepare("UPDATE auth_rate_limits SET attempts=attempts+1,updated_at=? WHERE key_hash=?")
+    .bind(new Date(now).toISOString(),key).run();
+  return true;
+}
 async function authStart(request, env) {
   if (request.method !== "GET") return text("Method not allowed", 405, { Allow: "GET" });
   if (!clientId(env)) return text("GitHub OAuth is not configured.", 503);
+  if (!await allowAuthAttempt(request,env)) return text("Too many sign-in attempts. Please wait 15 minutes and try again.",429,{"Retry-After":"900"});
   const state = randomToken();
   const callback = new URL("/api/callback", new URL(request.url).origin).toString();
   const params = new URLSearchParams({
@@ -443,7 +461,7 @@ async function api(request, env) {
     const fail=await requireMutation(request,env,user);if(fail)return fail;
     const body=await request.json().catch(()=>null);
     const email=clean(body&&body.email,254).toLowerCase();
-    const role=clean(body&&body.role,40);
+    const role=clean(body&&body.role,40).toLowerCase();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))return json({ok:false,error:"Enter a valid email address."},422);
     if(!["administrator","editor","author","media_manager","viewer"].includes(role))return json({ok:false,error:"Choose a valid role."},422);
     const existing=await env.DB.prepare("SELECT id FROM admin_users WHERE lower(email)=lower(?) AND status='active'").bind(email).first();
