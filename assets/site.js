@@ -28,24 +28,35 @@
       });
     });
   }
-  var contactForm=document.querySelector('form[name="contact"][data-mailto]');
+  var contactForm=document.querySelector('form[name="contact"][data-server]');
   if(contactForm){
-    contactForm.addEventListener("submit",function(event){
+    contactForm.addEventListener("submit",async function(event){
       event.preventDefault();
       if(!contactForm.reportValidity())return;
+      var button=contactForm.querySelector('button[type="submit"]');
+      var status=document.getElementById("contact-status");
       var data=new FormData(contactForm);
-      var recipient=contactForm.getAttribute("data-mailto");
-      var subject="Website enquiry: "+(data.get("topic")||"General enquiry");
-      var body=[
-        "Name: "+(data.get("name")||""),
-        "Email: "+(data.get("email")||""),
-        "Phone: "+(data.get("phone")||"Not provided"),
-        "Topic: "+(data.get("topic")||"General enquiry"),
-        "",
-        "Message:",
-        data.get("message")||""
-      ].join("\n");
-      window.location.href="mailto:"+encodeURIComponent(recipient)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+      var payload={
+        name:data.get("name")||"",
+        email:data.get("email")||"",
+        phone:data.get("phone")||"",
+        topic:data.get("topic")||"General enquiry",
+        message:data.get("message")||"",
+        website:data.get("website")||""
+      };
+      if(button){button.disabled=true;button.textContent="Submitting…";}
+      if(status){status.textContent="Submitting your enquiry…";status.className="form-status info";}
+      try{
+        var response=await fetch("/api/contact",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(payload),credentials:"same-origin"});
+        var result=await response.json();
+        if(!response.ok)throw new Error(result.error||"Unable to submit your enquiry.");
+        contactForm.reset();
+        if(status){status.textContent=result.message||"Thank you. Your enquiry has been received.";status.className="form-status success";}
+      }catch(error){
+        if(status){status.textContent=error.message||"Something went wrong. Please try again.";status.className="form-status error";}
+      }finally{
+        if(button){button.disabled=false;button.textContent="Submit enquiry";}
+      }
     });
   }
   document.querySelectorAll("[data-year]").forEach(function(node){
