@@ -105,7 +105,7 @@
             <label class="field">Display order<input name="sortOrder" type="number" min="0" max="9999" value="0"></label>
             <label class="field">Status<select name="status"><option value="draft">Draft</option><option value="in_review">In review</option><option value="scheduled">Scheduled</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
             <label class="field full">Summary<textarea name="summary" rows="2" maxlength="600"></textarea></label>
-            <label class="field full">Policy content (HTML/text)<textarea name="bodyHtml" rows="8" required maxlength="30000"></textarea></label>
+            <label class="field full">Policy content (plain text; HTML is escaped)<textarea name="bodyHtml" rows="8" required maxlength="30000"></textarea></label>
             <label class="field" id="policy-schedule-field" hidden>Publish date &amp; time<input type="datetime-local" name="scheduledAt"></label>
             <div class="modal-actions full"><button class="button primary" type="submit">Save policy priority</button><button class="button secondary" type="reset">Clear form</button></div>
           </form></div>
