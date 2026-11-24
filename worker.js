@@ -237,22 +237,22 @@ async function authCallback(request, env) {
     const profileResponse = await fetch("https://api.github.com/user", { headers: apiHeaders });
     if (!profileResponse.ok) throw new Error("Unable to verify GitHub account.");
     const profile = await profileResponse.json();
-    let email = profile.email || "";
-    if (!email) {
-      const emailsResponse = await fetch("https://api.github.com/user/emails", { headers: apiHeaders });
-      if (emailsResponse.ok) {
-        const emails = await emailsResponse.json();
-        const primary = Array.isArray(emails) ? emails.find(x => x.primary && x.verified) : null;
-        email = primary ? primary.email : "";
-      }
+    let email = "";
+    let verifiedEmail = false;
+    const emailsResponse = await fetch("https://api.github.com/user/emails", { headers: apiHeaders });
+    if (emailsResponse.ok) {
+      const emails = await emailsResponse.json();
+      const primary = Array.isArray(emails) ? emails.find(x => x.primary && x.verified) : null;
+      if (primary) { email = primary.email; verifiedEmail = true; }
     }
-    if (!email) email = "github-" + profile.id + "@users.noreply.github.com";
+    if (!email && profile.email) email = profile.email;
     const allowed = allowedGithubIds(env);
+    if (!email) email = "github-" + profile.id + "@users.noreply.github.com";
     let user = await env.DB.prepare("SELECT * FROM admin_users WHERE github_user_id=? LIMIT 1").bind(String(profile.id)).first();
     if (!user) {
-      const invite = await env.DB.prepare(
+      const invite = verifiedEmail ? await env.DB.prepare(
         "SELECT id,role FROM admin_invites WHERE lower(email)=lower(?) AND accepted_at IS NULL AND expires_at>? ORDER BY created_at DESC LIMIT 1"
-      ).bind(email,new Date().toISOString()).first();
+      ).bind(email,new Date().toISOString()).first() : null;
       if (invite) {
         const id = crypto.randomUUID();
         await env.DB.prepare(
