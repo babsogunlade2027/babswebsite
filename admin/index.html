@@ -1,34 +1,108 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#0B1B3D">
-  <title>BABS Content Manager</title>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <style>
-    :root{color-scheme:light;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:#f4f6f8;color:#172033}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh}
-    .top{background:#0B1B3D;color:#fff;padding:22px clamp(20px,5vw,64px);border-bottom:4px solid #f5b301}
-    .top strong{font-size:1.05rem;letter-spacing:.08em}.top span{display:block;color:#dce5f0;font-size:.9rem;margin-top:5px}
-    main{max-width:920px;margin:48px auto;padding:0 22px}
-    .panel{background:#fff;border:1px solid #e1e7ee;border-radius:16px;padding:30px;box-shadow:0 12px 36px #10203a0c}
-    h1{margin:0 0 12px;color:#0B1B3D;font-size:clamp(1.6rem,4vw,2.2rem)}
-    p{line-height:1.65;color:#465368}.notice{border-left:4px solid #f5b301;background:#fff9e8;padding:14px 16px;margin-top:22px;font-size:.92rem}
-    a{color:#0b5d34;font-weight:650}
-  </style>
-  <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A2540">
+<title>BABS Ogunlade | Administration</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/admin/admin.css">
 </head>
 <body>
-  <header class="top"><strong>BABS | CONTENT MANAGEMENT</strong><span>Official website publishing desk · Ibarapa East</span></header>
-  <main>
-    <section class="panel">
-      <h1>Website content manager</h1>
-      <p>Sign in with an authorised GitHub account to manage approved news releases and gallery entries. Published content is committed to the website repository.</p>
-      <div class="notice">Administrative access is restricted. Do not publish unverified claims, private information, or material that has not been approved by the campaign office.</div>
-      <p><a href="/">Return to the public website</a></p>
+<div id="app">
+  <section class="login-wrap" id="login-view" hidden>
+    <div class="login-card">
+      <div class="brand-mark">BABS</div>
+      <p class="eyebrow">BABS OGUNLADE 2027 · ADMINISTRATION</p>
+      <h1>Publishing desk</h1>
+      <p class="muted">Secure access for authorised members of the communications and administrative team.</p>
+      <a class="button primary wide" href="/api/auth">Continue with authorised GitHub account</a>
+      <p class="fine">Access is restricted to accounts approved by the system administrator. Your sign-in is verified on the server.</p>
+      <a class="back-link" href="/">← Return to public website</a>
+      <p class="login-message" id="login-message" role="status"></p>
+    </div>
+  </section>
+
+  <div class="shell" id="admin-shell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="/admin/"><span class="brand-mark">B</span><span><strong>BABS</strong><small>ADMINISTRATION</small></span></a>
+      <div class="side-caption">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Administration">
+        <button class="nav-item active" data-view="dashboard"><span class="nav-icon">▦</span>Overview</button>
+        <button class="nav-item" data-view="articles"><span class="nav-icon">▤</span>News &amp; articles</button>
+        <button class="nav-item" data-view="pages"><span class="nav-icon">▧</span>Website pages</button>
+        <button class="nav-item" data-view="team" id="team-nav" hidden><span class="nav-icon">♙</span>Administrators</button>
+      </nav>
+      <div class="side-caption">PLATFORM</div>
+      <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">▧</span>Media library <span class="soon">Next</span></div>
+      <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">▦</span>Galleries <span class="soon">Next</span></div>
+      <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">◎</span>Profile &amp; policies <span class="soon">Next</span></div>
+      <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">✉</span>Enquiries <span class="soon">Next</span></div>
+      <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">☷</span>Navigation &amp; SEO <span class="soon">Next</span></div>
+      <div class="sidebar-bottom">
+        <div class="identity"><span class="avatar" id="user-avatar">B</span><span><strong id="user-name">Administrator</strong><small id="user-role">Administrator</small></span></div>
+        <button class="logout" id="logout-button">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+        <div><span class="top-kicker">BABS OGUNLADE 2027</span><strong id="top-title">Overview</strong></div>
+        <a class="public-link" href="/" target="_blank" rel="noopener">View public website ↗</a>
+      </header>
+      <div class="content" id="content">
+        <section class="view" id="view-dashboard">
+          <div class="page-heading"><div><p class="eyebrow">WORKSPACE OVERVIEW</p><h1>Good day, <span id="greeting-name">Administrator</span></h1><p class="muted">Your website publishing activity at a glance.</p></div><button class="button primary" id="quick-new-article">＋ New article</button></div>
+          <div class="stats-grid" id="stats-grid" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+          <div class="dashboard-grid">
+            <section class="panel"><div class="panel-heading"><div><h2>Recent activity</h2><p>Latest recorded administration events</p></div></div><div id="activity-list" class="activity-list"><p class="muted">Loading activity…</p></div></section>
+            <section class="panel"><div class="panel-heading"><div><h2>Publishing workflow</h2><p>Content status from the CMS database</p></div></div><div id="workflow-list" class="workflow-list"><p class="muted">Loading content status…</p></div><div class="panel-foot">Counts reflect saved CMS records only.</div></section>
+          </div>
+          <section class="panel roadmap"><div class="panel-heading"><div><h2>Platform modules</h2><p>Modules are enabled as their secure storage and workflows are completed.</p></div></div><div class="module-status"><span class="status-dot live"></span><span><strong>Editorial publishing</strong><small>Articles and website pages · Connected to D1</small></span><b>Available</b></div><div class="module-status"><span class="status-dot pending"></span><span><strong>Media, galleries, enquiries and policy tools</strong><small>Storage and workflow integration is still in progress.</small></span><b>In development</b></div></section>
+        </section>
+
+        <section class="view" id="view-articles" hidden>
+          <div class="page-heading"><div><p class="eyebrow">EDITORIAL</p><h1>News &amp; articles</h1><p class="muted">Create, review and publish official updates.</p></div><button class="button primary" id="new-article">＋ Create article</button></div>
+          <div class="toolbar"><input id="article-search" type="search" placeholder="Search headlines or summaries"><select id="article-status"><option value="">All statuses</option><option value="published">Published</option><option value="draft">Draft</option><option value="in_review">In review</option><option value="scheduled">Scheduled</option><option value="archived">Archived</option></select></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Article</th><th>Category</th><th>Status</th><th>Last updated</th><th></th></tr></thead><tbody id="article-rows"><tr><td colspan="5" class="empty-cell">Loading articles…</td></tr></tbody></table></div></div>
+        </section>
+
+        <section class="view" id="view-pages" hidden>
+          <div class="page-heading"><div><p class="eyebrow">PUBLIC WEBSITE</p><h1>Website pages</h1><p class="muted">Manage page content and publication status.</p></div><button class="button primary" id="new-page">＋ Create page</button></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Page</th><th>URL slug</th><th>Status</th><th>Navigation</th><th></th></tr></thead><tbody id="page-rows"><tr><td colspan="5" class="empty-cell">Loading pages…</td></tr></tbody></table></div></div>
+        </section>
+
+        <section class="view" id="view-team" hidden>
+          <div class="page-heading"><div><p class="eyebrow">ACCESS CONTROL</p><h1>Administrators</h1><p class="muted">Review accounts currently authorised to access the CMS.</p></div></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last login</th></tr></thead><tbody id="team-rows"><tr><td colspan="5" class="empty-cell">Loading administrators…</td></tr></tbody></table></div></div>
+          <p class="notice">New accounts are currently provisioned through the secure GitHub account allowlist configured in Cloudflare Worker secrets. Invitation management is not yet enabled.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="editor-modal" hidden>
+    <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+      <header class="modal-header"><div><p class="eyebrow" id="editor-kind">CONTENT EDITOR</p><h2 id="editor-title">Create article</h2></div><button class="icon-button" id="close-editor" aria-label="Close editor">×</button></header>
+      <form id="content-form">
+        <div class="form-grid">
+          <label class="field full">Title<input name="title" required maxlength="180" placeholder="Enter a clear, accurate headline"></label>
+          <label class="field">URL slug<input name="slug" maxlength="120" placeholder="generated-from-title"></label>
+          <label class="field" id="category-field">Category<select name="categoryId" id="category-select"></select></label>
+          <label class="field full">Short summary<textarea name="excerpt" rows="2" maxlength="500" placeholder="A concise introduction for the public website"></textarea></label>
+          <label class="field full">Content <span class="field-hint">Plain text / Markdown. HTML is not accepted.</span><textarea name="bodyMarkdown" rows="12" required maxlength="50000" placeholder="Write the article or page content here…"></textarea></label>
+          <label class="field">Publication status<select name="status"><option value="draft">Save as draft</option><option value="in_review">In review</option><option value="published">Publish</option><option value="archived">Archive</option></select></label>
+          <label class="check-field" id="navigation-field"><input type="checkbox" name="showInNavigation"> Show in website navigation</label>
+        </div>
+        <p class="form-error" id="form-error" role="alert"></p>
+        <div class="modal-actions"><button type="button" class="button secondary" id="cancel-editor">Cancel</button><button type="submit" class="button primary" id="save-content">Save content</button></div>
+      </form>
     </section>
-  </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script src="/admin/app.js" defer></script>
 </body>
 </html>
