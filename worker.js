@@ -640,7 +640,7 @@ export default {
     if(url.pathname.startsWith("/api/")) return api(request,env);
     const articlePath=url.pathname.match(/^\/news\/([a-z0-9-]+)\.html$/);
     if(articlePath){const article=await publicArticlePage(env,articlePath[1]);if(article)return article;}
-    const pagePath=url.pathname.match(/^\/([a-z0-9-]+)\.html$/);
+    const pagePath=url.pathname.match(/^\/pages\/([a-z0-9-]+)\.html$/);
     if(pagePath){const page=await publicPageBySlug(env,pagePath[1]);if(page)return page;}
     const path=resolvePath(url.pathname);
     if(path===null)return text("Bad path",400);
