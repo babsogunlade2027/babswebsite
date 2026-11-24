@@ -98,7 +98,7 @@ The existing Worker custom domains are attached to `babswebsite-preview`. Deploy
 Existing Worker settings were inspected:
 - `GITHUB_OAUTH_CLIENT_ID` is a plain-text binding.
 - `GITHUB_OAUTH_CLIENT_SECRET` is a secret binding.
-- D1 binding `DB` is configured in this branch's Wrangler file.
+- Wrangler now targets the isolated `babswebsite-cms-staging` Worker and a staging D1 placeholder; it does not bind the production D1 database.
 - `CONTENT_BRANCH` points at this feature branch.
 - `ADMIN_GITHUB_IDS` identifies the initial bootstrap GitHub account.
 - A minute Cron trigger is configured for scheduled publication.
