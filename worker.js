@@ -544,6 +544,128 @@ async function api(request, env) {
     await audit(env,user,"invite","admin_user",inviteId,"Invited "+email+" as "+role+".");
     return json({ok:true,message:"Invitation created. The invitee must sign in with a verified GitHub account using this email.",expiresAt:expires},201);
   }
+
+  if(path==="/api/profile"&&request.method==="GET"){
+    if(!can(user,"read","policies"))return json({ok:false,error:"Forbidden."},403);
+    const result=await env.DB.prepare("SELECT id,section_key,title,content_json,status,updated_at FROM profile_sections ORDER BY section_key").all();
+    return json({ok:true,items:result.results||[]});
+  }
+  if(path==="/api/profile"&&request.method==="PUT"){
+    if(!can(user,"update","policies"))return json({ok:false,error:"Forbidden."},403);
+    const fail=await requireMutation(request,env,user);if(fail)return fail;
+    const body=await request.json().catch(()=>null);
+    const key=clean(body&&body.sectionKey,60).toLowerCase().replace(/[^a-z0-9_-]/g,"");
+    const title=clean(body&&body.title,180),status=clean(body&&body.status,20);
+    const content=body&&body.content;
+    if(!/^[a-z0-9_-]{2,60}$/.test(key)||title.length<2||!["draft","published","archived"].includes(status)||!content||typeof content!=="object"||Array.isArray(content))return json({ok:false,error:"Provide a valid section key, title, content object and status."},422);
+    const serialized=JSON.stringify(content);
+    if(serialized.length>30000)return json({ok:false,error:"Profile section content is too large."},413);
+    const id=crypto.randomUUID(),now=new Date().toISOString();
+    await env.DB.prepare("INSERT INTO profile_sections (id,section_key,title,content_json,status,updated_by,updated_at) VALUES (?,?,?,?,?,?,?) ON CONFLICT(section_key) DO UPDATE SET title=excluded.title,content_json=excluded.content_json,status=excluded.status,updated_by=excluded.updated_by,updated_at=excluded.updated_at")
+      .bind(id,key,title,serialized,status,user.id,now).run();
+    await audit(env,user,"upsert","profile_section",key,"Updated profile section: "+title);
+    return json({ok:true,sectionKey:key});
+  }
+  if(path==="/api/policies"&&request.method==="GET"){
+    if(!can(user,"read","policies"))return json({ok:false,error:"Forbidden."},403);
+    const result=await env.DB.prepare("SELECT id,title,slug,summary,body_html,status,sort_order,published_at,scheduled_at,updated_at FROM policy_priorities ORDER BY sort_order ASC,created_at DESC").all();
+    return json({ok:true,items:result.results||[]});
+  }
+  if(path==="/api/policies"&&request.method==="POST"){
+    if(!can(user,"create","policies"))return json({ok:false,error:"Forbidden."},403);
+    const fail=await requireMutation(request,env,user);if(fail)return fail;
+    const body=await request.json().catch(()=>null);
+    const title=clean(body&&body.title,180),slug=slugify(body&&body.slug||title),summary=clean(body&&body.summary,600),bodyHtml=clean(body&&body.bodyHtml,30000);
+    const status=STATES.includes(body&&body.status)?body.status:"draft",sortOrder=Number.isFinite(Number(body&&body.sortOrder))?Math.max(0,Math.min(9999,Math.trunc(Number(body.sortOrder)))):0;
+    if(title.length<3||!validSlug(slug)||bodyHtml.length<1)return json({ok:false,error:"Enter a valid title, slug and policy content."},422);
+    let scheduledAt=null;if(status==="scheduled"){const d=body.scheduledAt?new Date(body.scheduledAt):null;if(!d||Number.isNaN(d.getTime())||d.getTime()<=Date.now())return json({ok:false,error:"Choose a future publication date."},422);scheduledAt=d.toISOString();}
+    const id=crypto.randomUUID(),now=new Date().toISOString();
+    try{await env.DB.prepare("INSERT INTO policy_priorities (id,title,slug,summary,body_html,status,sort_order,author_id,published_at,scheduled_at,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(id,title,slug,summary,bodyHtml,status,sortOrder,user.id,status==="published"?now:null,scheduledAt,now,now).run();}
+    catch{return json({ok:false,error:"A policy item with this slug may already exist."},409);}
+    await audit(env,user,"create","policy",id,"Created policy priority: "+title);
+    return json({ok:true,id},201);
+  }
+  const policyMatch=path.match(/^\/api\/policies\/([0-9a-f-]+)$/i);
+  if(policyMatch&&request.method==="PUT"){
+    if(!can(user,"update","policies"))return json({ok:false,error:"Forbidden."},403);
+    const fail=await requireMutation(request,env,user);if(fail)return fail;
+    const body=await request.json().catch(()=>null);
+    const title=clean(body&&body.title,180),slug=slugify(body&&body.slug||title),summary=clean(body&&body.summary,600),bodyHtml=clean(body&&body.bodyHtml,30000);
+    const status=STATES.includes(body&&body.status)?body.status:"draft",sortOrder=Number.isFinite(Number(body&&body.sortOrder))?Math.max(0,Math.min(9999,Math.trunc(Number(body&&body.sortOrder)))):0;
+    if(title.length<3||!validSlug(slug)||!bodyHtml)return json({ok:false,error:"Enter a valid title, slug and policy content."},422);
+    let scheduledAt=null;if(status==="scheduled"){const d=body.scheduledAt?new Date(body.scheduledAt):null;if(!d||Number.isNaN(d.getTime())||d.getTime()<=Date.now())return json({ok:false,error:"Choose a future publication date."},422);scheduledAt=d.toISOString();}
+    const now=new Date().toISOString();
+    try{const result=await env.DB.prepare("UPDATE policy_priorities SET title=?,slug=?,summary=?,body_html=?,status=?,sort_order=?,published_at=CASE WHEN ?='published' THEN COALESCE(published_at,?) ELSE published_at END,scheduled_at=?,updated_at=? WHERE id=?")
+      .bind(title,slug,summary,bodyHtml,status,sortOrder,status,now,scheduledAt,now,policyMatch[1]).run();
+      if(!Number(result.meta?.changes||0))return json({ok:false,error:"Policy item not found."},404);}
+    catch{return json({ok:false,error:"A policy item with this slug may already exist."},409);}
+    await audit(env,user,"update","policy",policyMatch[1],"Updated policy priority: "+title);
+    return json({ok:true});
+  }
+  if(path==="/api/navigation"&&request.method==="GET"){
+    if(!can(user,"read","navigation"))return json({ok:false,error:"Forbidden."},403);
+    const menuId=crypto.randomUUID();
+    await env.DB.prepare("INSERT OR IGNORE INTO navigation_menus (id,menu_key,label) VALUES (?,?,?)").bind(menuId,"primary","Primary navigation").run();
+    const menu=await env.DB.prepare("SELECT id FROM navigation_menus WHERE menu_key='primary'").first();
+    const result=await env.DB.prepare("SELECT id,label,url,sort_order,visible,target FROM navigation_items WHERE menu_id=? ORDER BY sort_order,id").bind(menu.id).all();
+    return json({ok:true,items:result.results||[]});
+  }
+  if(path==="/api/navigation"&&request.method==="PUT"){
+    if(!can(user,"update","navigation"))return json({ok:false,error:"Forbidden."},403);
+    const fail=await requireMutation(request,env,user);if(fail)return fail;
+    const body=await request.json().catch(()=>null),items=body&&body.items;
+    if(!Array.isArray(items)||items.length>30)return json({ok:false,error:"Provide up to 30 navigation links."},422);
+    const cleanItems=[];
+    for(let i=0;i<items.length;i++){
+      const item=items[i]||{},label=clean(item.label,80),url=clean(item.url,500),target=item.target==="_blank"?"_blank":"_self";
+      if(label.length<1||url.length<1||(!url.startsWith("/")&&!/^https:\/\//i.test(url))||url.startsWith("//")||url.includes("\\")||url.includes("\0"))return json({ok:false,error:"Each link needs a label and a safe site-relative or HTTPS URL."},422);
+      cleanItems.push({id:crypto.randomUUID(),label,url,target,visible:item.visible===false?0:1,sort_order:i});
+    }
+    const menuId=crypto.randomUUID();
+    await env.DB.prepare("INSERT OR IGNORE INTO navigation_menus (id,menu_key,label) VALUES (?,?,?)").bind(menuId,"primary","Primary navigation").run();
+    const menu=await env.DB.prepare("SELECT id FROM navigation_menus WHERE menu_key='primary'").first();
+    const statements=[env.DB.prepare("DELETE FROM navigation_items WHERE menu_id=?").bind(menu.id),...cleanItems.map(x=>env.DB.prepare("INSERT INTO navigation_items (id,menu_id,label,url,sort_order,visible,target) VALUES (?,?,?,?,?,?,?)").bind(x.id,menu.id,x.label,x.url,x.sort_order,x.visible,x.target))];
+    await env.DB.batch(statements);
+    await audit(env,user,"replace","navigation",menu.id,"Updated primary website navigation.");
+    return json({ok:true,count:cleanItems.length});
+  }
+  if(path==="/api/press"&&request.method==="GET"){
+    if(!can(user,"read","press"))return json({ok:false,error:"Forbidden."},403);
+    const result=await env.DB.prepare("SELECT a.id,a.title,a.slug,a.status,a.published_at,p.media_contact,p.attachment_media_id FROM articles a LEFT JOIN press_releases p ON p.article_id=a.id WHERE p.article_id IS NOT NULL OR a.category_id IN (SELECT id FROM categories WHERE slug='press-releases') ORDER BY a.updated_at DESC LIMIT 200").all();
+    return json({ok:true,items:result.results||[]});
+  }
+  const pressMatch=path.match(/^\/api\/press\/([0-9a-f-]+)$/i);
+  if(pressMatch&&request.method==="PUT"){
+    if(!can(user,"update","press"))return json({ok:false,error:"Forbidden."},403);
+    const fail=await requireMutation(request,env,user);if(fail)return fail;
+    const body=await request.json().catch(()=>null),mediaContact=clean(body&&body.mediaContact,300),attachmentId=clean(body&&body.attachmentMediaId,80)||null;
+    const article=await env.DB.prepare("SELECT id FROM articles WHERE id=?").bind(pressMatch[1]).first();
+    if(!article)return json({ok:false,error:"Article not found."},404);
+    if(attachmentId){const media=await env.DB.prepare("SELECT id FROM media WHERE id=?").bind(attachmentId).first();if(!media)return json({ok:false,error:"Attachment not found in the media library."},422);}
+    await env.DB.prepare("INSERT INTO press_releases (id,article_id,media_contact,attachment_media_id) VALUES (?,?,?,?) ON CONFLICT(article_id) DO UPDATE SET media_contact=excluded.media_contact,attachment_media_id=excluded.attachment_media_id")
+      .bind(crypto.randomUUID(),article.id,mediaContact,attachmentId).run();
+    await audit(env,user,"upsert","press_release",article.id,"Updated press release details.");
+    return json({ok:true});
+  }
+  const userMatch=path.match(/^\/api\/users\/([0-9a-f-]+)$/i);
+  if(userMatch&&request.method==="PATCH"){
+    if(user.role!=="super_admin")return json({ok:false,error:"Forbidden."},403);
+    const fail=await requireMutation(request,env,user);if(fail)return fail;
+    const body=await request.json().catch(()=>null),targetId=userMatch[1],role=clean(body&&body.role,40),status=clean(body&&body.status,20);
+    if(targetId===user.id)return json({ok:false,error:"You cannot change your own role or account status."},409);
+    if(!ROLES.includes(role)||!["active","suspended","disabled"].includes(status))return json({ok:false,error:"Choose a valid role and account status."},422);
+    const target=await env.DB.prepare("SELECT id,role,status FROM admin_users WHERE id=?").bind(targetId).first();
+    if(!target)return json({ok:false,error:"Administrator not found."},404);
+    if(target.role==="super_admin"&&(role!=="super_admin"||status!=="active")){
+      const count=await env.DB.prepare("SELECT COUNT(*) AS n FROM admin_users WHERE role='super_admin' AND status='active'").first();
+      if(Number(count?.n||0)<=1)return json({ok:false,error:"At least one active Super Administrator must remain."},409);
+    }
+    await env.DB.prepare("UPDATE admin_users SET role=?,status=?,updated_at=? WHERE id=?").bind(role,status,new Date().toISOString(),targetId).run();
+    if(status!=="active")await env.DB.prepare("DELETE FROM admin_sessions WHERE admin_user_id=?").bind(targetId).run();
+    await audit(env,user,"update","admin_user",targetId,"Changed administrator role/status.");
+    return json({ok:true});
+  }
   return json({ok:false,error:"Not found."},404);
 }
 
