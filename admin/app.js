@@ -35,7 +35,7 @@ function setView(view){
  state.view=view;
  document.querySelectorAll(".view").forEach(function(node){node.hidden=node.id!=="view-"+view;});
  document.querySelectorAll(".side-nav .nav-item").forEach(function(node){node.classList.toggle("active",node.dataset.view===view);});
- var titles={dashboard:"Overview",articles:"News & articles",pages:"Website pages",team:"Administrators",enquiries:"Website enquiries",profile:"Profile sections",policies:"Policy priorities",navigation:"Navigation manager"};
+ var titles={dashboard:"Overview",articles:"News & articles",pages:"Website pages",team:"Administrators",enquiries:"Website enquiries",profile:"Profile sections",policies:"Policy priorities",navigation:"Navigation manager",press:"Press releases"};
  $("top-title").textContent=titles[view]||"Administration";
  $("sidebar").classList.remove("open");$("mobile-menu").setAttribute("aria-expanded","false");
  if(view==="dashboard")loadDashboard();
@@ -46,6 +46,7 @@ function setView(view){
  if(view==="profile")loadProfile();
  if(view==="policies")loadPolicies();
  if(view==="navigation")loadNavigation();
+ if(view==="press")loadPress();
 }
 function statCard(label,value,foot){return '<article class="stat-card"><div class="stat-label">'+escapeHtml(label)+'</div><div class="stat-value">'+Number(value||0).toLocaleString("en-GB")+'</div><div class="stat-foot">'+escapeHtml(foot)+'</div></article>';}
 async function loadDashboard(){
@@ -147,6 +148,10 @@ async function loadPolicies(){
  $("policy-rows").innerHTML='<tr><td colspan="5" class="empty-cell">Loading priorities…</td></tr>';
  try{var d=await api("/api/policies"),items=d.items||[];$("policy-rows")._items=items;$("policy-rows").innerHTML=items.length?items.map(function(x){return '<tr><td><span class="row-title">'+escapeHtml(x.title)+'</span><span class="row-sub">'+escapeHtml(x.summary||"")+'</span></td><td>'+escapeHtml(x.slug)+'</td><td>'+statusPill(x.status)+'</td><td>'+Number(x.sort_order||0)+'</td><td><button class="table-action" data-policy-id="'+escapeHtml(x.id)+'">Edit</button></td></tr>';}).join(""):'<tr><td colspan="5" class="empty-cell">No policy priorities have been created.</td></tr>';}catch(e){$("policy-rows").innerHTML='<tr><td colspan="5" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
 }
+async function loadPress(){
+ $("press-rows").innerHTML='<tr><td colspan="5" class="empty-cell">Loading press releases…</td></tr>';
+ try{var d=await api("/api/press"),items=d.items||[];$("press-rows")._items=items;$("press-rows").innerHTML=items.length?items.map(function(x){return '<tr><td><span class="row-title">'+escapeHtml(x.title)+'</span><span class="row-sub">/news/'+escapeHtml(x.slug)+'.html</span></td><td>'+statusPill(x.status)+'</td><td>'+date(x.published_at)+'</td><td>'+escapeHtml(x.media_contact||"Not set")+'</td><td><button class="table-action" data-press-id="'+escapeHtml(x.id)+'">Edit contact</button></td></tr>';}).join(""):'<tr><td colspan="5" class="empty-cell">No press-release articles found. Assign an article to the Press Releases category first.</td></tr>';}catch(e){$("press-rows").innerHTML='<tr><td colspan="5" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
+}
 async function loadNavigation(){try{var d=await api("/api/navigation");$("navigation-form").elements.items.value=JSON.stringify(d.items||[],null,2);}catch(e){toast(e.message);}}
 async function saveProfile(event){
  event.preventDefault();var f=event.currentTarget,d=new FormData(f),content;
@@ -190,6 +195,7 @@ function bind(){
  $("policy-form").elements.status.addEventListener("change",function(){$("policy-schedule-field").hidden=this.value!=="scheduled";});
  $("policy-rows").addEventListener("click",function(e){var b=e.target.closest("[data-policy-id]");if(!b)return;var x=(this._items||[]).find(function(v){return v.id===b.dataset.policyId;});if(!x)return;var f=$("policy-form");f.elements.id.value=x.id;f.elements.title.value=x.title;f.elements.slug.value=x.slug;f.elements.slug.dataset.touched="1";f.elements.summary.value=x.summary||"";f.elements.bodyHtml.value=x.body_html||"";f.elements.status.value=x.status;f.elements.sortOrder.value=x.sort_order||0;$("policy-schedule-field").hidden=x.status!=="scheduled";});
  $("navigation-form").addEventListener("submit",saveNavigation);
+ $("press-rows").addEventListener("click",async function(e){var b=e.target.closest("[data-press-id]");if(!b)return;var item=(this._items||[]).find(function(x){return x.id===b.dataset.pressId;});if(!item)return;var contact=window.prompt("Media contact details:",item.media_contact||"");if(contact===null)return;try{await api("/api/press/"+encodeURIComponent(item.id),{method:"PUT",body:JSON.stringify({mediaContact:contact})});toast("Press release details saved.");await loadPress();}catch(err){toast(err.message);}});
  $("team-rows").addEventListener("click",async function(e){var b=e.target.closest("[data-save-user]");if(!b)return;var id=b.dataset.saveUser,role=this.querySelector("[data-user-role=\""+id+"\"]").value,status=this.querySelector("[data-user-status=\""+id+"\"]").value;b.disabled=true;try{await api("/api/users/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({role:role,status:status})});toast("Administrator access updated.");await loadTeam();}catch(err){toast(err.message);}finally{b.disabled=false;}});
  $("content-status").addEventListener("change",function(){$("schedule-field").hidden=this.value!=="scheduled";});
  $("close-editor").addEventListener("click",closeEditor);$("cancel-editor").addEventListener("click",closeEditor);
