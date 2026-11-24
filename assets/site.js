@@ -116,3 +116,39 @@ if(newsList){
 var hero=document.querySelector(".page-hero .wrap");
 if(hero&&!document.querySelector(".page-hero img")){var path=location.pathname;var chosen=path.indexOf("press")>=0?photos[2][0]:path.indexOf("priorities")>=0?photos[5][0]:path.indexOf("about")>=0?photos[0][0]:null;if(chosen){var img=document.createElement("img");img.src="/"+chosen;img.alt="BABS community engagement";img.loading="lazy";img.style.cssText="display:block;width:100%;max-height:330px;object-fit:cover;border-radius:14px;margin-top:24px";hero.appendChild(img);}}
 })();
+
+
+(function(){
+"use strict";
+function node(tag,cls,value){var n=document.createElement(tag);if(cls)n.className=cls;if(value!==undefined)n.textContent=value;return n;}
+function paragraphs(target,value){(Array.isArray(value)?value:[value]).filter(Boolean).forEach(function(line){target.appendChild(node("p","",line));});}
+fetch("/api/public/navigation",{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+ var items=d&&d.items||[];if(!items.length)return;
+ document.querySelectorAll(".nav").forEach(function(nav){nav.replaceChildren();items.forEach(function(item){
+  var a=node("a","",item.label);a.href=item.url;if(item.target==="_blank"){a.target="_blank";a.rel="noopener noreferrer";}
+  var path=new URL(a.href,location.origin).pathname;if(path===location.pathname||((path==="/index.html"||path==="/")&&(location.pathname==="/"||location.pathname==="/index.html")))a.setAttribute("aria-current","page");
+  nav.appendChild(a);
+ });});
+}).catch(function(){});
+if(location.pathname.endsWith("/about.html")){
+ fetch("/api/public/profile",{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+  var items=d&&d.items||[],target=document.querySelector("#main .block .split");if(!items.length||!target)return;
+  var fragment=document.createDocumentFragment();items.forEach(function(item){
+   var data={};try{data=JSON.parse(item.content_json||"{}");}catch(e){}
+   var section=node("section","profile-cms-section");section.appendChild(node("h2","",data.heading||item.title));
+   paragraphs(section,data.paragraphs||data.body||data.text||"");
+   if(Array.isArray(data.bullets)&&data.bullets.length){var ul=node("ul","checks");data.bullets.forEach(function(x){ul.appendChild(node("li","",x));});section.appendChild(ul);}
+   fragment.appendChild(section);
+  });target.replaceChildren(fragment);
+ }).catch(function(){});
+}
+if(location.pathname.endsWith("/priorities.html")){
+ fetch("/api/public/policies",{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+  var items=d&&d.items||[],target=document.querySelector("#main .grid.g2");if(!items.length||!target)return;
+  var fragment=document.createDocumentFragment();items.forEach(function(item){
+   var card=node("article","card");card.appendChild(node("h2","",item.title));if(item.summary)card.appendChild(node("p","",item.summary));
+   var body=String(item.body_html||"").split(/\n+/).map(function(x){return x.trim();}).filter(Boolean);paragraphs(card,body);fragment.appendChild(card);
+  });target.replaceChildren(fragment);
+ }).catch(function(){});
+}
+})();
