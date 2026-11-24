@@ -1,6 +1,6 @@
 # CMS Implementation Status
 
-**Updated:** 24 November 2026  
+**Updated:** 24 November 2026 (continued implementation)  
 **Branch:** `cms/phase-one-audit-and-foundation`  
 **Pull request:** #4 (draft)  
 **Production deployment:** Not performed
@@ -24,6 +24,7 @@ The existing public site remains a static HTML/CSS/JavaScript website served by 
 - Roles supported by the policy layer: Super Administrator, Administrator, Editor, Author, Media Manager and Viewer.
 - Enquiry access is restricted to Super Administrators and Administrators.
 - Administrator invitation endpoint is restricted to Super Administrators.
+- Super Administrators can update administrator roles and suspend/disable accounts; changes to inactive accounts revoke existing sessions.
 
 ### Editorial workflows
 - D1-backed article list, create, read and update endpoints.
@@ -43,6 +44,7 @@ The existing public site remains a static HTML/CSS/JavaScript website served by 
 - Enquiries are persisted in D1.
 - Validation, payload-size limits, honeypot, same-origin checks and hashed-IP rate limits are implemented.
 - Protected enquiry list and status-update endpoints are implemented.
+- Dedicated press-release metadata API and admin view support media-contact details; file attachments remain blocked by R2.
 - Admin inbox displays sender, topic, message excerpt and receipt date; administrators can update status.\n- Public pages can now submit enquiries without opening the visitor's mail client.
 
 ### Administrative interface
@@ -52,6 +54,10 @@ The existing public site remains a static HTML/CSS/JavaScript website served by 
 - Enquiry inbox with status updates.
 - Role-aware navigation and action visibility.
 - Admin styles follow the approved green, navy, gold and neutral palette.
+- Profile section editor stores structured JSON content; published sections are rendered on the public About page.
+- Policy priority editor supports draft, review, scheduled, published and archived states; scheduled policies publish through the Worker Cron and published priorities render on the public Priorities page.
+- Primary navigation manager validates site-relative/HTTPS links and exposes the saved menu to public pages, including the homepage.
+- Article and page editors now validate and store canonical URLs and optional media-library IDs for social images; canonical URLs are applied to generated public content.
 - No third-party admin JavaScript bundle is loaded.
 
 ## D1 database status
@@ -74,12 +80,12 @@ Verified against the live D1 control plane:
 |---|---|---|
 | Media upload and optimisation | Blocked | R2 is not enabled on the Cloudflare account. Bucket creation returned Cloudflare error 10042; enable R2 in the dashboard, then provision bucket and bind it to Worker. |
 | Gallery management | Pending | Requires media storage and gallery API/UI. |
-| Biography/profile editor | Pending | Schema exists; API/UI and migration of verified existing profile content remain. |
-| Policy priorities editor | Pending | Schema exists; API/UI remain. |
-| Press release module | Partial | Articles can be categorised as press releases; dedicated press attachments/contact metadata UI remains. |
-| Navigation manager | Pending | Schema exists; API/UI and public navigation renderer remain. |
-| SEO manager | Partial | Public article metadata is generated; dedicated per-page SEO controls, sitemap and canonical management remain. |
-| User role editing/deactivation | Pending | Invitations and user list exist; role changes, deactivation, password reset and login-history controls remain. |
+| Biography/profile editor | Implemented | Structured JSON profile sections, role-protected editor and public About-page rendering. Existing static biography remains the fallback until CMS sections are published. |
+| Policy priorities editor | Implemented | CRUD editor, sort order, status workflow, scheduled publication and public Priorities-page rendering. Existing static priorities remain the fallback until CMS items are published. |
+| Press release module | Partial | Dedicated list and media-contact editor are implemented. Attachments still depend on R2 media storage. |
+| Navigation manager | Implemented | Primary menu CRUD, URL validation and public navigation rendering are implemented. The homepage has its own navigation loader. |
+| SEO manager | Partial | Article/page SEO title, meta description and canonical URL controls are implemented. Sitemap is dynamic; OG image IDs are accepted only for existing media records and cannot be populated until media storage is available. |
+| User role editing/deactivation | Partial | Super Administrators can change roles and suspend/disable accounts with session revocation. Password reset is not applicable to GitHub OAuth; richer login history remains outstanding. |
 | Analytics | Not connected | Dashboard intentionally omits unverified performance metrics. |
 | Rich WYSIWYG editor | Pending | Current editor accepts plain text/Markdown content; safe rich-text toolbar and sanitisation are not yet implemented. |
 | Media usage tracking | Pending | Depends on media API and reference tracking. |
@@ -103,7 +109,7 @@ Before deployment, verify that the OAuth app callback URL includes the staging o
 
 - JavaScript syntax parsing succeeded for `worker.js`, `admin/app.js` and `assets/site.js`.
 - D1 table inventory, migration ledger, category seed count and foreign-key check were queried directly.
-- No live browser, OAuth round-trip, file upload, visual responsive or full end-to-end publication test has yet been run.
+- No live browser, OAuth round-trip, file upload, visual responsive or full end-to-end publication test has yet been run. New management endpoints and public rendering were added to the feature branch but still require staging runtime tests.
 - No production Worker, DNS, custom-domain route or public production content was changed.
 
 ## Release gates
