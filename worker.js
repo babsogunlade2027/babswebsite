@@ -457,6 +457,11 @@ async function api(request, env) {
   if (path === "/api/auth") return authStart(request, env);
   if (path === "/api/callback") return authCallback(request, env);
   if (path === "/api/public/articles" && request.method === "GET") return publicArticles(env);
+  if (path === "/api/public/navigation" && request.method === "GET") {
+    const menu=env.DB?await env.DB.prepare("SELECT id FROM navigation_menus WHERE menu_key='primary'").first():null;
+    const result=menu?await env.DB.prepare("SELECT label,url,target FROM navigation_items WHERE menu_id=? AND visible=1 ORDER BY sort_order,id").bind(menu.id).all():{results:[]};
+    return json({ok:true,items:result.results||[]},200,{"Cache-Control":"public, max-age=120, s-maxage=120"});
+  }
   if (path === "/api/public/profile" && request.method === "GET") {
     const result=env.DB?await env.DB.prepare("SELECT section_key,title,content_json,updated_at FROM profile_sections WHERE status='published' ORDER BY section_key").all():{results:[]};
     return json({ok:true,items:result.results||[]},200,{"Cache-Control":"public, max-age=120, s-maxage=120"});
