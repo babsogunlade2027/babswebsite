@@ -9,7 +9,7 @@
 
 ## Executive summary
 
-The project is a static HTML/CSS/JavaScript website served by a Cloudflare Worker. GitHub is the source repository and the existing Decap CMS is intended to publish content through GitHub OAuth. The Cloudflare account contains two Worker scripts named `babs07` and `babswebsite-preview`; both apex and www hostnames are currently attached to `babswebsite-preview`. There are no Cloudflare Pages projects and no D1 databases in the connected account at audit time.
+The project is a static HTML/CSS/JavaScript website served by a Cloudflare Worker. GitHub is the source repository and the existing Decap CMS is intended to publish content through GitHub OAuth. The Cloudflare account contains two Worker scripts named `babs07` and `babswebsite-preview`; both apex and www hostnames are currently attached to `babswebsite-preview`. There are no Cloudflare Pages projects. A D1 database named `babs-cms-production` was provisioned during this implementation session and its initial CMS schema was applied; it is not yet bound to the deployed Worker.
 
 This is not yet the requested full administrative CMS. The current CMS config only defines news and gallery collections, and those configured `_posts/news` and `_posts/gallery` folders do not exist in the inspected main-branch tree. The actual public newsroom reads JSON files under `news/`; gallery content is hard-coded in browser JavaScript. The contact form is split across two different implementations: the interior contact page opens a mailto draft, while the Team Babs signup Cloudflare Pages Function sends email through Resend. Neither inspected path stores enquiry records in a database.
 
@@ -21,7 +21,7 @@ This is not yet the requested full administrative CMS. The current CMS config on
 - Custom domains: apex and www are both enabled as Worker domains on that script.
 - Cloudflare zone: `babatundeogunlade.com`, active.
 - Cloudflare Pages projects: none returned by the connected account API.
-- Cloudflare D1 databases: none returned by the connected account API.
+- Cloudflare D1 database: `babs-cms-production` created on 24 November 2026; initial schema applied and verified (21 tables including Cloudflare's internal `_cf_KV` table).
 - Legacy Worker: `babs07`, with older deployments; it is not the Worker currently attached to the two custom domains.
 - Worker deployment history: `babswebsite-preview` has multiple deployments, most recent inspected deployment on 21 November 2026.
 
@@ -104,7 +104,7 @@ This is not yet the requested full administrative CMS. The current CMS config on
 2. Production Worker code and repository Worker code are not identical.
 3. The six requested CMS roles do not exist.
 4. No relational database or persistent enquiry store currently exists in the connected Cloudflare account.
-5. The live website's rendered pages, response headers, real form submission and OAuth flow could not be independently exercised from this runtime; Cloudflare control-plane state and repository source were inspected instead.
+5. The new D1 database is provisioned and schema-verified, but the production Worker does not yet have the D1 binding or CMS API handlers. It is not a live CMS backend yet.\n6. The live website's rendered pages, response headers, real form submission and OAuth flow could not be independently exercised from this runtime; Cloudflare control-plane state and repository source were inspected instead.
 6. A production-grade CMS cannot be honestly declared complete until backend identity, persistence, public rendering and browser tests are implemented and exercised.
 
 ## 7. Evidence sources
