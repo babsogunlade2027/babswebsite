@@ -694,7 +694,7 @@ async function publicSitemap(env) {
   const base="https://babatundeogunlade.com";
   const urls=["/","/about.html","/priorities.html","/press.html","/gallery.html","/contact.html","/manifesto.html","/privacy.html"];
   if(env.DB){
-    const [articles,pages]=await Promise.all([
+    const [articles,pages,policies]=await Promise.all([
       env.DB.prepare("SELECT slug,published_at FROM articles WHERE status='published' AND (scheduled_at IS NULL OR scheduled_at<=?)").bind(new Date().toISOString()).all(),
       env.DB.prepare("SELECT slug,published_at FROM pages WHERE status='published'").all()
     ]);
@@ -798,7 +798,7 @@ export default {
       env.DB.prepare("UPDATE pages SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run(),
       env.DB.prepare("UPDATE policy_priorities SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run()
     ]);
-    const changed=Number(articles.meta?.changes||0)+Number(pages.meta?.changes||0);
+    const changed=Number(articles.meta?.changes||0)+Number(pages.meta?.changes||0)+Number(policies.meta?.changes||0);
     if(changed)await env.DB.prepare("INSERT INTO activity_logs (id,action,entity_type,summary) VALUES (?,?,?,?)").bind(crypto.randomUUID(),"scheduled_publish","content","Automatically published "+changed+" scheduled content item(s).").run();
   },
   async fetch(request,env) {
