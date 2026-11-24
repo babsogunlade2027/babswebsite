@@ -2,5 +2,11 @@ name = "babswebsite-preview"
 main = "worker.js"
 compatibility_date = "2026-10-20"
 
-# OAuth credentials are managed as Cloudflare Worker secret bindings.
+# OAuth credentials remain managed as Cloudflare Worker secret bindings.
 # Preserve the existing CLIENT_ID and CLIENT_SECRET bindings.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "babs-cms-production"
+database_id = "ce86e7a4-c7d7-4630-8924-62e7b64aae73"
+migrations_dir = "migrations"
