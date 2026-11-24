@@ -99,7 +99,8 @@
           <label class="field" id="category-field">Category<select name="categoryId" id="category-select"></select></label>
           <label class="field full">Short summary<textarea name="excerpt" rows="2" maxlength="500" placeholder="A concise introduction for the public website"></textarea></label>
           <label class="field full">Content <span class="field-hint">Plain text / Markdown. HTML is not accepted.</span><textarea name="bodyMarkdown" rows="12" required maxlength="50000" placeholder="Write the article or page content here…"></textarea></label>
-          <label class="field">Publication status<select name="status"><option value="draft">Save as draft</option><option value="in_review">In review</option><option value="published">Publish</option><option value="archived">Archive</option></select></label>
+          <label class="field">Publication status<select name="status" id="content-status"><option value="draft">Save as draft</option><option value="in_review">In review</option><option value="scheduled">Schedule publication</option><option value="published">Publish now</option><option value="archived">Archive</option></select></label>
+          <label class="field" id="schedule-field" hidden>Publish date &amp; time<input type="datetime-local" name="scheduledAt"></label>
           <label class="check-field" id="navigation-field"><input type="checkbox" name="showInNavigation"> Show in website navigation</label>
         </div>
         <p class="form-error" id="form-error" role="alert"></p>
