@@ -38,7 +38,7 @@
       <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">▧</span>Media library <span class="soon">Next</span></div>
       <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">▦</span>Galleries <span class="soon">Next</span></div>
       <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">◎</span>Profile &amp; policies <span class="soon">Next</span></div>
-      <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">✉</span>Enquiries <span class="soon">Next</span></div>
+      <button class="nav-item" data-view="enquiries" id="enquiries-nav"><span class="nav-icon">✉</span>Enquiries</button>
       <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">☷</span>Navigation &amp; SEO <span class="soon">Next</span></div>
       <div class="sidebar-bottom">
         <div class="identity"><span class="avatar" id="user-avatar">B</span><span><strong id="user-name">Administrator</strong><small id="user-role">Administrator</small></span></div>
@@ -72,6 +72,12 @@
         <section class="view" id="view-pages" hidden>
           <div class="page-heading"><div><p class="eyebrow">PUBLIC WEBSITE</p><h1>Website pages</h1><p class="muted">Manage page content and publication status.</p></div><button class="button primary" id="new-page">＋ Create page</button></div>
           <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Page</th><th>URL slug</th><th>Status</th><th>Navigation</th><th></th></tr></thead><tbody id="page-rows"><tr><td colspan="5" class="empty-cell">Loading pages…</td></tr></tbody></table></div></div>
+        </section>
+
+        <section class="view" id="view-enquiries" hidden>
+          <div class="page-heading"><div><p class="eyebrow">COMMUNITY CONTACT</p><h1>Website enquiries</h1><p class="muted">Read and track messages submitted through the public contact form.</p></div></div>
+          <div class="toolbar"><select id="enquiry-status"><option value="">All messages</option><option value="unread">Unread</option><option value="read">Read</option><option value="in_progress">In progress</option><option value="responded">Responded</option><option value="archived">Archived</option></select></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Sender</th><th>Topic &amp; message</th><th>Received</th><th>Status</th><th>Update</th></tr></thead><tbody id="enquiry-rows"><tr><td colspan="5" class="empty-cell">Loading enquiries…</td></tr></tbody></table></div></div>
         </section>
 
         <section class="view" id="view-team" hidden>
