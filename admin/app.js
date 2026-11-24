@@ -73,7 +73,7 @@ async function loadArticles(){
 async function loadPages(){
  $("page-rows").innerHTML='<tr><td colspan="5" class="empty-cell">Loading pages…</td></tr>';
  try{var d=await api("/api/pages");state.pages=d.items||[];
-  $("page-rows").innerHTML=state.pages.length?state.pages.map(function(p){return '<tr><td><span class="row-title">'+escapeHtml(p.title)+'</span><span class="row-sub">'+escapeHtml(p.excerpt||"")+'</span></td><td>/'+escapeHtml(p.slug)+'</td><td>'+statusPill(p.status)+'</td><td>'+(p.show_in_navigation?"Visible":"Hidden")+'</td><td><button class="table-action" data-edit-page="'+escapeHtml(p.id)+'">Edit</button></td></tr>';}).join(""):'<tr><td colspan="5" class="empty-cell">No CMS-managed pages have been created yet.</td></tr>';
+  $("page-rows").innerHTML=state.pages.length?state.pages.map(function(p){return '<tr><td><span class="row-title">'+escapeHtml(p.title)+'</span><span class="row-sub">'+escapeHtml(p.excerpt||"")+'</span></td><td>/pages/'+escapeHtml(p.slug)+'.html</td><td>'+statusPill(p.status)+'</td><td>'+(p.show_in_navigation?"Visible":"Hidden")+'</td><td><button class="table-action" data-edit-page="'+escapeHtml(p.id)+'">Edit</button></td></tr>';}).join(""):'<tr><td colspan="5" class="empty-cell">No CMS-managed pages have been created yet.</td></tr>';
  }catch(e){$("page-rows").innerHTML='<tr><td colspan="5" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
 }
 async function loadEnquiries(){
