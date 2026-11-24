@@ -30,14 +30,14 @@ This is not yet the requested full administrative CMS. The current CMS config on
 | Priority | Finding | Evidence | Recommended action |
 |---|---|---|---|
 | Critical | Existing CMS content paths do not match the repository | `admin/config.yml` targets `_posts/news` and `_posts/gallery`; neither folder exists in main tree | Reconcile content model and public renderer before enabling editorial changes |
-| Critical | OAuth identity is not an application role system | Worker exchanges GitHub OAuth code and returns access token to CMS popup; no role lookup or app session is present | Replace with server-validated identity and role-based authorization before exposing wider staff access |
+| Critical | OAuth identity is not an application role system | Worker exchanges GitHub OAuth code and returns access token to CMS popup; no role lookup or app session is present | Replace with server-validated identity and role-based authorization before exposing wider staff access |\n| Critical | Admin route is not protected by Worker authentication | `/admin` is resolved to `admin/index.html`; Worker marks it noindex but does not require an authenticated session to serve it | Gate admin assets and all admin APIs through authenticated server-side authorization |
 | High | Production Worker differs from repository Worker source | Cloudflare deployed Worker source was fetched; it lacks the CSP declarations and some hardening present in main-branch `worker.js` | Reconcile deployed artifact with reviewed source and deploy through a controlled release |
 | High | Public news content is stored as static generated files | `news/index.json`, `news/articles.json` and individual HTML article files are present; newsroom JavaScript reads JSON | Build a content publishing pipeline that updates public indexes and article routes atomically |
 | High | Contact page does not persist enquiries | `contact.html` uses `data-mailto` and opens a mail client; `assets/site.js` constructs a mailto URL | Replace with a protected server endpoint and enquiry database |
 | High | Existing serverless signup handler is email-only | `functions/api/contact.js` validates input and sends through Resend, but contains no database write | Extend only after selecting the actual deployment/runtime; persist and audit submissions |
 | Medium | Gallery page depends on hard-coded JavaScript | `assets/js/content.js` contains a static photo array; `gallery.html` initially shows an empty-state message | Move gallery metadata to managed content and render published records |
 | Medium | Public design system has drift | Homepage uses `assets/css/style.css`; interior pages use `assets/styles.css`; separate palettes and nav patterns | Consolidate shared tokens and components in a controlled visual migration |
-| Medium | Admin page is a minimal shell | `admin/index.html` is a short Decap CMS entry page; no custom dashboard or admin modules | Keep current editor as a transition only; build real admin workflows on a secured backend |
+| Medium | Admin page is a minimal shell | `admin/index.html` is a short Decap CMS entry page; no custom dashboard or admin modules | Keep current editor as a transition only; build real admin workflows on a secured backend |\n| Medium | Canonical www redirect is not proven active | `_redirects` contains a www-to-apex redirect, but the active custom-domain Worker serves requests itself and does not process static-host `_redirects` rules | Add a host-based redirect in the Worker or an explicit Cloudflare redirect rule after validating canonical preference |
 | Low | Documentation has outdated or inconsistent brand copy | README and editorial guide contain different tagline/brand palette statements | Reconcile documentation with the approved current campaign brief after confirmation |
 
 ## 3. Security observations
@@ -45,7 +45,7 @@ This is not yet the requested full administrative CMS. The current CMS config on
 - Worker OAuth callback validates a random state cookie and stores the OAuth client secret in Worker bindings, not in the source file.
 - The OAuth authorization request uses `public_repo` scope. This is broader than a narrowly scoped application session and returns the access token to the browser-side CMS.
 - No application-level staff allowlist, role table, permission map or audit event persistence was found in inspected source.
-- `_headers` contains a site-wide CSP, but the production Worker source retrieved from Cloudflare does not currently emit the same CSP policy. Confirm the effective response headers at the edge before relying on the repository header file.
+- `_headers` contains a site-wide CSP, but the production Worker source retrieved from Cloudflare does not currently emit the same CSP policy. Static-host `_headers` files are not automatically applied by this custom Worker response path; verify and set headers in the Worker itself.
 - The contact signup function performs input sanitisation, size checks and same-origin validation, but no persistent storage or explicit rate limiter is present in that function.
 - No D1 database or Pages project was found in the connected Cloudflare account.
 
