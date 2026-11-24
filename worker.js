@@ -425,6 +425,27 @@ async function api(request, env) {
   return json({ok:false,error:"Not found."},404);
 }
 
+function escapeHtml(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[ch]);
+}
+async function publicArticlePage(env, slug) {
+  if (!env.DB) return text("Not found",404);
+  const row = await env.DB.prepare(
+    "SELECT a.title,a.slug,a.excerpt,a.body_markdown,a.published_at,c.name AS category FROM articles a LEFT JOIN categories c ON c.id=a.category_id WHERE a.slug=? AND a.status='published' AND (a.scheduled_at IS NULL OR a.scheduled_at<=?) LIMIT 1"
+  ).bind(slug,new Date().toISOString()).first();
+  if (!row) return text("Article not found",404);
+  const paragraphs = String(row.body_markdown || "").split(/\n\s*\n/).map(part => part.trim()).filter(Boolean)
+    .map(part => "<p>" + escapeHtml(part).replace(/\n/g,"<br>") + "</p>").join("\n");
+  const title = escapeHtml(row.title);
+  const description = escapeHtml(row.excerpt || row.title);
+  const category = escapeHtml(row.category || "News and Updates");
+  const dateLabel = row.published_at ? new Date(row.published_at).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}) : "";
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>${title} | BABS Ogunlade</title><meta name="description" content="${description}"><link rel="canonical" href="https://babatundeogunlade.com/news/${encodeURIComponent(row.slug)}.html"><meta property="og:type" content="article"><meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:url" content="https://babatundeogunlade.com/news/${encodeURIComponent(row.slug)}.html"><link rel="stylesheet" href="/assets/styles.css"><style>.cms-article{max-width:850px;margin:0 auto;padding:52px 22px 80px}.cms-article h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.12;color:#0A2540}.cms-article .meta{color:#64748b;font-size:13px;margin:18px 0 30px}.cms-article .body{font-size:17px;line-height:1.85;color:#243244}.cms-article .body p{margin:0 0 1.25em}.cms-article .back{color:#008751;font-weight:700}</style></head><body><header class="site-header"><div class="wrap"><a class="brand" href="/"><span class="brand-mark">BABS</span><span class="brand-text"><strong>Hon. Babatunde Sunday Ogunlade</strong><span>Public Information</span></span></a><nav class="nav"><a href="/">Home</a><a href="/about.html">About</a><a href="/priorities.html">Priorities</a><a href="/press.html">Press Centre</a></nav></div></header><main class="cms-article"><a class="back" href="/press.html#news">← Back to Press Centre</a><p class="eyebrow">${category}</p><h1>${title}</h1><div class="meta">${escapeHtml(dateLabel)} · Official BABS Ogunlade update</div><div class="body">${paragraphs}</div></main><footer class="site-footer"><div class="wrap"><p>© ${new Date().getFullYear()} Babatunde Sunday Ogunlade. All rights reserved.</p></div></footer></body></html>`;
+  return new Response(html,{status:200,headers:headers({"Content-Type":"text/html; charset=utf-8","Cache-Control":"public, max-age=60","Content-Security-Policy":PUBLIC_CSP,"X-Frame-Options":"DENY"})});
+}
+
 function resolvePath(pathname) {
   let decoded;
   try { decoded = decodeURIComponent(pathname); } catch { return null; }
@@ -478,6 +499,8 @@ export default {
   async fetch(request,env) {
     const url=new URL(request.url);
     if(url.pathname.startsWith("/api/")) return api(request,env);
+    const articlePath=url.pathname.match(/^\/news\/([a-z0-9-]+)\.html$/);
+    if(articlePath) return publicArticlePage(env,articlePath[1]);
     const path=resolvePath(url.pathname);
     if(path===null)return text("Bad path",400);
     return serveFile(path,url.pathname.startsWith("/admin"),env);
