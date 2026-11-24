@@ -87,7 +87,7 @@ Verified against the live D1 control plane:
 | SEO manager | Partial | Article/page SEO title, meta description and canonical URL controls are implemented. Sitemap is dynamic; OG image IDs are accepted only for existing media records and cannot be populated until media storage is available. |
 | User role editing/deactivation | Partial | Super Administrators can change roles and suspend/disable accounts with session revocation. Password reset is not applicable to GitHub OAuth; richer login history remains outstanding. |
 | Analytics | Not connected | Dashboard intentionally omits unverified performance metrics. |
-| Rich WYSIWYG editor | Pending | Current editor accepts plain text/Markdown content; safe rich-text toolbar and sanitisation are not yet implemented. |
+| Rich WYSIWYG editor | Partial | Markdown editor now has formatting shortcuts for bold, italic, headings, lists, quotes and links. A full visual WYSIWYG editor remains outstanding; public rendering escapes content rather than trusting submitted HTML. |
 | Media usage tracking | Pending | Depends on media API and reference tracking. |
 | Backup automation | Pending | Configure and test D1 backup schedule/restore procedure before production. |
 
