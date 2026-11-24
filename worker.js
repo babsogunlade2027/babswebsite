@@ -357,6 +357,10 @@ async function saveArticle(request, env, user, id = null) {
   const bodyMarkdown = clean(body.bodyMarkdown, 50000);
   const seoTitle = clean(body.seoTitle,180);
   const metaDescription = clean(body.metaDescription,300);
+  const canonicalUrl = clean(body.canonicalUrl,500);
+  if(canonicalUrl){try{const parsed=new URL(canonicalUrl);if(parsed.protocol!=="https:")throw new Error();}catch{return json({ok:false,error:"Canonical URL must be a valid HTTPS URL."},422);}}
+  const ogImageMediaId = clean(body.ogImageMediaId,80) || null;
+  if(ogImageMediaId && !await env.DB.prepare("SELECT id FROM media WHERE id=?").bind(ogImageMediaId).first())return json({ok:false,error:"Choose a valid media-library image."},422);
   const slug = slugify(body.slug || title);
   let status = STATES.includes(body.status) ? body.status : "draft";
   if (user.role === "author") status = "draft";
@@ -380,15 +384,15 @@ async function saveArticle(request, env, user, id = null) {
     if (user.role === "author" && existing.author_id !== user.id) return json({ ok: false, error: "You can only edit your own articles." }, 403);
     const publishedAt = status === "published" ? now : null;
     await env.DB.prepare(
-      "UPDATE articles SET title=?,slug=?,excerpt=?,body_markdown=?,category_id=?,status=?,seo_title=?,meta_description=?,published_at=COALESCE(?,published_at),scheduled_at=?,updated_at=? WHERE id=?"
-    ).bind(title,slug,excerpt,bodyMarkdown,categoryId,status,seoTitle,metaDescription,publishedAt,scheduledAt,now,id).run();
+      "UPDATE articles SET title=?,slug=?,excerpt=?,body_markdown=?,category_id=?,status=?,seo_title=?,meta_description=?,canonical_url=?,og_image_media_id=?,published_at=COALESCE(?,published_at),scheduled_at=?,updated_at=? WHERE id=?"
+    ).bind(title,slug,excerpt,bodyMarkdown,categoryId,status,seoTitle,metaDescription,canonicalUrl,ogImageMediaId,publishedAt,scheduledAt,now,id).run();
     await audit(env,user,"update","article",id,"Updated article: "+title);
     return json({ ok: true, id });
   }
   const newId = crypto.randomUUID();
   await env.DB.prepare(
-    "INSERT INTO articles (id,title,slug,excerpt,body_markdown,category_id,status,author_id,seo_title,meta_description,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
-  ).bind(newId,title,slug,excerpt,bodyMarkdown,categoryId,status,user.id,seoTitle,metaDescription,status==="published"?now:null,scheduledAt).run();
+    "INSERT INTO articles (id,title,slug,excerpt,body_markdown,category_id,status,author_id,seo_title,meta_description,canonical_url,og_image_media_id,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+  ).bind(newId,title,slug,excerpt,bodyMarkdown,categoryId,status,user.id,seoTitle,metaDescription,canonicalUrl,ogImageMediaId,status==="published"?now:null,scheduledAt).run();
   await audit(env,user,"create","article",newId,"Created article: "+title);
   return json({ ok: true, id: newId }, 201);
 }
@@ -421,15 +425,15 @@ async function savePage(request, env, user, id = null) {
     const existing = await env.DB.prepare("SELECT id FROM pages WHERE id=?").bind(id).first();
     if (!existing) return json({ ok: false, error: "Page not found." }, 404);
     await env.DB.prepare(
-      "UPDATE pages SET title=?,slug=?,excerpt=?,body_markdown=?,status=?,show_in_navigation=?,seo_title=?,meta_description=?,published_at=CASE WHEN ?='published' THEN COALESCE(published_at,?) ELSE published_at END,scheduled_at=?,updated_at=? WHERE id=?"
-    ).bind(title,slug,excerpt,bodyMarkdown,status,nav,seoTitle,metaDescription,status,now,scheduledAt,now,id).run();
+      "UPDATE pages SET title=?,slug=?,excerpt=?,body_markdown=?,status=?,show_in_navigation=?,seo_title=?,meta_description=?,canonical_url=?,og_image_media_id=?,published_at=CASE WHEN ?='published' THEN COALESCE(published_at,?) ELSE published_at END,scheduled_at=?,updated_at=? WHERE id=?"
+    ).bind(title,slug,excerpt,bodyMarkdown,status,nav,seoTitle,metaDescription,canonicalUrl,ogImageMediaId,status,now,scheduledAt,now,id).run();
     await audit(env,user,"update","page",id,"Updated page: "+title);
     return json({ ok: true, id });
   }
   const newId = crypto.randomUUID();
   await env.DB.prepare(
-    "INSERT INTO pages (id,title,slug,excerpt,body_markdown,status,show_in_navigation,author_id,seo_title,meta_description,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
-  ).bind(newId,title,slug,excerpt,bodyMarkdown,status,nav,user.id,seoTitle,metaDescription,status==="published"?now:null,scheduledAt).run();
+    "INSERT INTO pages (id,title,slug,excerpt,body_markdown,status,show_in_navigation,author_id,seo_title,meta_description,canonical_url,og_image_media_id,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+  ).bind(newId,title,slug,excerpt,bodyMarkdown,status,nav,user.id,seoTitle,metaDescription,canonicalUrl,ogImageMediaId,status==="published"?now:null,scheduledAt).run();
   await audit(env,user,"create","page",newId,"Created page: "+title);
   return json({ ok: true, id: newId }, 201);
 }
