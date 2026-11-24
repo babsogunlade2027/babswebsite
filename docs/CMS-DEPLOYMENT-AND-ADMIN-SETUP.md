@@ -16,8 +16,9 @@ Preserve these bindings when deploying the new Worker. Do not copy secrets into 
 
 ## Wrangler configuration in this branch
 
-The feature branch's `wrangler.toml` contains:
-- D1 binding `DB` to `babs-cms-production`.
+The feature branch's `wrangler.toml` is deliberately staging-safe and contains:
+- D1 binding `DB` is a staging placeholder (`babs-cms-staging`); replace the database ID only after creating and migrating a separate staging database.
+- The production D1 database `babs-cms-production` remains isolated and is not bound by this staging config.
 - `CONTENT_BRANCH` set to `cms/phase-one-audit-and-foundation`.
 - `ADMIN_GITHUB_IDS` set to the repository owner's verified GitHub numeric account ID for initial Super Administrator bootstrap.
 - A one-minute Cron trigger for scheduled publishing.
@@ -54,13 +55,15 @@ R2 bucket creation was attempted and Cloudflare returned error 10042: R2 must fi
 
 ## Deploy commands
 
+After creating a separate staging D1 database, applying the migrations, configuring the staging OAuth callback and adding the OAuth secret binding, deploy only the staging Worker.
+
 After staging bindings and secrets are confirmed:
 
 ```sh
 npx wrangler deploy --config wrangler.toml
 ```
 
-Run this only from the feature branch and only after changing the script name and host routing to the staging Worker. Do not point the staging configuration at the production custom domains.
+The script name is already `babswebsite-cms-staging`. Replace the staging D1 placeholder before running. Never point this staging configuration at the production custom domains or production D1 database.
 
 ## Production cutover
 
