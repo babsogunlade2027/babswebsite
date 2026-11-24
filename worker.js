@@ -547,6 +547,23 @@ async function api(request, env) {
   return json({ok:false,error:"Not found."},404);
 }
 
+async function publicSitemap(env) {
+  const base="https://babatundeogunlade.com";
+  const urls=["/","/about.html","/priorities.html","/press.html","/gallery.html","/contact.html","/manifesto.html","/privacy.html"];
+  if(env.DB){
+    const [articles,pages]=await Promise.all([
+      env.DB.prepare("SELECT slug,published_at FROM articles WHERE status='published' AND (scheduled_at IS NULL OR scheduled_at<=?)").bind(new Date().toISOString()).all(),
+      env.DB.prepare("SELECT slug,published_at FROM pages WHERE status='published'").all()
+    ]);
+    for(const a of articles.results||[])urls.push("/news/"+encodeURIComponent(a.slug)+".html");
+    for(const p of pages.results||[])urls.push("/pages/"+encodeURIComponent(p.slug)+".html");
+  }
+  const xml='<?xml version="1.0" encoding="UTF-8"?>'+
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+
+    urls.map(path=>'<url><loc>'+base+path+'</loc></url>').join("")+
+    '</urlset>';
+  return new Response(xml,{status:200,headers:headers({"Content-Type":"application/xml; charset=utf-8","Cache-Control":"public, max-age=300","X-Content-Type-Options":"nosniff"})});
+}
 async function publicPageBySlug(env, slug) {
   if (!env.DB) return null;
   const row = await env.DB.prepare(
@@ -643,6 +660,7 @@ export default {
   async fetch(request,env) {
     const url=new URL(request.url);
     if(url.pathname.startsWith("/api/")) return api(request,env);
+    if(url.pathname==="/sitemap.xml"&&request.method==="GET")return publicSitemap(env);
     const articlePath=url.pathname.match(/^\/news\/([a-z0-9-]+)\.html$/);
     if(articlePath){const article=await publicArticlePage(env,articlePath[1]);if(article)return article;}
     const pagePath=url.pathname.match(/^\/pages\/([a-z0-9-]+)\.html$/);
