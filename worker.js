@@ -355,6 +355,8 @@ async function saveArticle(request, env, user, id = null) {
   const title = clean(body.title, 180);
   const excerpt = clean(body.excerpt, 500);
   const bodyMarkdown = clean(body.bodyMarkdown, 50000);
+  const seoTitle = clean(body.seoTitle,180);
+  const metaDescription = clean(body.metaDescription,300);
   const slug = slugify(body.slug || title);
   let status = STATES.includes(body.status) ? body.status : "draft";
   if (user.role === "author") status = "draft";
@@ -378,15 +380,15 @@ async function saveArticle(request, env, user, id = null) {
     if (user.role === "author" && existing.author_id !== user.id) return json({ ok: false, error: "You can only edit your own articles." }, 403);
     const publishedAt = status === "published" ? now : null;
     await env.DB.prepare(
-      "UPDATE articles SET title=?,slug=?,excerpt=?,body_markdown=?,category_id=?,status=?,published_at=COALESCE(?,published_at),scheduled_at=?,updated_at=? WHERE id=?"
-    ).bind(title,slug,excerpt,bodyMarkdown,categoryId,status,publishedAt,scheduledAt,now,id).run();
+      "UPDATE articles SET title=?,slug=?,excerpt=?,body_markdown=?,category_id=?,status=?,seo_title=?,meta_description=?,published_at=COALESCE(?,published_at),scheduled_at=?,updated_at=? WHERE id=?"
+    ).bind(title,slug,excerpt,bodyMarkdown,categoryId,status,seoTitle,metaDescription,publishedAt,scheduledAt,now,id).run();
     await audit(env,user,"update","article",id,"Updated article: "+title);
     return json({ ok: true, id });
   }
   const newId = crypto.randomUUID();
   await env.DB.prepare(
-    "INSERT INTO articles (id,title,slug,excerpt,body_markdown,category_id,status,author_id,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?)"
-  ).bind(newId,title,slug,excerpt,bodyMarkdown,categoryId,status,user.id,status==="published"?now:null,scheduledAt).run();
+    "INSERT INTO articles (id,title,slug,excerpt,body_markdown,category_id,status,author_id,seo_title,meta_description,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+  ).bind(newId,title,slug,excerpt,bodyMarkdown,categoryId,status,user.id,seoTitle,metaDescription,status==="published"?now:null,scheduledAt).run();
   await audit(env,user,"create","article",newId,"Created article: "+title);
   return json({ ok: true, id: newId }, 201);
 }
@@ -402,6 +404,8 @@ async function savePage(request, env, user, id = null) {
   const title = clean(body.title, 180);
   const excerpt = clean(body.excerpt, 500);
   const bodyMarkdown = clean(body.bodyMarkdown, 50000);
+  const seoTitle = clean(body.seoTitle,180);
+  const metaDescription = clean(body.metaDescription,300);
   const slug = slugify(body.slug || title);
   const status = STATES.includes(body.status) ? body.status : "draft";
   if (title.length < 3 || !validSlug(slug) || !bodyMarkdown) return json({ ok: false, error: "Enter a valid title, slug and page content." }, 422);
@@ -417,15 +421,15 @@ async function savePage(request, env, user, id = null) {
     const existing = await env.DB.prepare("SELECT id FROM pages WHERE id=?").bind(id).first();
     if (!existing) return json({ ok: false, error: "Page not found." }, 404);
     await env.DB.prepare(
-      "UPDATE pages SET title=?,slug=?,excerpt=?,body_markdown=?,status=?,show_in_navigation=?,published_at=CASE WHEN ?='published' THEN COALESCE(published_at,?) ELSE published_at END,scheduled_at=?,updated_at=? WHERE id=?"
-    ).bind(title,slug,excerpt,bodyMarkdown,status,nav,status,now,scheduledAt,now,id).run();
+      "UPDATE pages SET title=?,slug=?,excerpt=?,body_markdown=?,status=?,show_in_navigation=?,seo_title=?,meta_description=?,published_at=CASE WHEN ?='published' THEN COALESCE(published_at,?) ELSE published_at END,scheduled_at=?,updated_at=? WHERE id=?"
+    ).bind(title,slug,excerpt,bodyMarkdown,status,nav,seoTitle,metaDescription,status,now,scheduledAt,now,id).run();
     await audit(env,user,"update","page",id,"Updated page: "+title);
     return json({ ok: true, id });
   }
   const newId = crypto.randomUUID();
   await env.DB.prepare(
-    "INSERT INTO pages (id,title,slug,excerpt,body_markdown,status,show_in_navigation,author_id,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?)"
-  ).bind(newId,title,slug,excerpt,bodyMarkdown,status,nav,user.id,status==="published"?now:null,scheduledAt).run();
+    "INSERT INTO pages (id,title,slug,excerpt,body_markdown,status,show_in_navigation,author_id,seo_title,meta_description,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+  ).bind(newId,title,slug,excerpt,bodyMarkdown,status,nav,user.id,seoTitle,metaDescription,status==="published"?now:null,scheduledAt).run();
   await audit(env,user,"create","page",newId,"Created page: "+title);
   return json({ ok: true, id: newId }, 201);
 }
@@ -546,12 +550,12 @@ async function api(request, env) {
 async function publicPageBySlug(env, slug) {
   if (!env.DB) return null;
   const row = await env.DB.prepare(
-    "SELECT title,slug,excerpt,body_markdown,published_at FROM pages WHERE slug=? AND status='published' LIMIT 1"
+    "SELECT title,seo_title,meta_description,slug,excerpt,body_markdown,published_at FROM pages WHERE slug=? AND status='published' LIMIT 1"
   ).bind(slug).first();
   if (!row) return null;
-  const title=escapeHtml(row.title),description=escapeHtml(row.excerpt||row.title);
+  const title=escapeHtml(row.title),seoTitle=escapeHtml(row.seo_title||row.title),description=escapeHtml(row.meta_description||row.excerpt||row.title);
   const paragraphs=String(row.body_markdown||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).map(x=>"<p>"+escapeHtml(x).replace(/\n/g,"<br>")+"</p>").join("\n");
-  const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>${title} | BABS Ogunlade</title><meta name="description" content="${description}"><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="site-header"><div class="wrap"><a class="brand" href="/"><span class="brand-mark">BABS</span><span class="brand-text"><strong>Hon. Babatunde Sunday Ogunlade</strong><span>Public Information</span></span></a><nav class="nav"><a href="/">Home</a><a href="/about.html">About</a><a href="/priorities.html">Priorities</a><a href="/press.html">Press Centre</a></nav></div></header><main class="cms-article"><a class="back" href="/">← Home</a><h1>${title}</h1><div class="body">${paragraphs}</div></main></body></html>`;
+  const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>${seoTitle} | BABS Ogunlade</title><meta name="description" content="${description}"><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="site-header"><div class="wrap"><a class="brand" href="/"><span class="brand-mark">BABS</span><span class="brand-text"><strong>Hon. Babatunde Sunday Ogunlade</strong><span>Public Information</span></span></a><nav class="nav"><a href="/">Home</a><a href="/about.html">About</a><a href="/priorities.html">Priorities</a><a href="/press.html">Press Centre</a></nav></div></header><main class="cms-article"><a class="back" href="/">← Home</a><h1>${title}</h1><div class="body">${paragraphs}</div></main></body></html>`;
   return new Response(html,{status:200,headers:headers({"Content-Type":"text/html; charset=utf-8","Cache-Control":"public, max-age=60","Content-Security-Policy":PUBLIC_CSP,"X-Frame-Options":"DENY"})});
 }
 function escapeHtml(value) {
@@ -562,16 +566,17 @@ function escapeHtml(value) {
 async function publicArticlePage(env, slug) {
   if (!env.DB) return text("Not found",404);
   const row = await env.DB.prepare(
-    "SELECT a.title,a.slug,a.excerpt,a.body_markdown,a.published_at,c.name AS category FROM articles a LEFT JOIN categories c ON c.id=a.category_id WHERE a.slug=? AND a.status='published' AND (a.scheduled_at IS NULL OR a.scheduled_at<=?) LIMIT 1"
+    "SELECT a.title,a.seo_title,a.meta_description,a.slug,a.excerpt,a.body_markdown,a.published_at,c.name AS category FROM articles a LEFT JOIN categories c ON c.id=a.category_id WHERE a.slug=? AND a.status='published' AND (a.scheduled_at IS NULL OR a.scheduled_at<=?) LIMIT 1"
   ).bind(slug,new Date().toISOString()).first();
   if (!row) return null;
   const paragraphs = String(row.body_markdown || "").split(/\n\s*\n/).map(part => part.trim()).filter(Boolean)
     .map(part => "<p>" + escapeHtml(part).replace(/\n/g,"<br>") + "</p>").join("\n");
   const title = escapeHtml(row.title);
-  const description = escapeHtml(row.excerpt || row.title);
+  const seoTitle = escapeHtml(row.seo_title || row.title);
+  const description = escapeHtml(row.meta_description || row.excerpt || row.title);
   const category = escapeHtml(row.category || "News and Updates");
   const dateLabel = row.published_at ? new Date(row.published_at).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}) : "";
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>${title} | BABS Ogunlade</title><meta name="description" content="${description}"><link rel="canonical" href="https://babatundeogunlade.com/news/${encodeURIComponent(row.slug)}.html"><meta property="og:type" content="article"><meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:url" content="https://babatundeogunlade.com/news/${encodeURIComponent(row.slug)}.html"><link rel="stylesheet" href="/assets/styles.css"><style>.cms-article{max-width:850px;margin:0 auto;padding:52px 22px 80px}.cms-article h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.12;color:#0A2540}.cms-article .meta{color:#64748b;font-size:13px;margin:18px 0 30px}.cms-article .body{font-size:17px;line-height:1.85;color:#243244}.cms-article .body p{margin:0 0 1.25em}.cms-article .back{color:#008751;font-weight:700}</style></head><body><header class="site-header"><div class="wrap"><a class="brand" href="/"><span class="brand-mark">BABS</span><span class="brand-text"><strong>Hon. Babatunde Sunday Ogunlade</strong><span>Public Information</span></span></a><nav class="nav"><a href="/">Home</a><a href="/about.html">About</a><a href="/priorities.html">Priorities</a><a href="/press.html">Press Centre</a></nav></div></header><main class="cms-article"><a class="back" href="/press.html#news">← Back to Press Centre</a><p class="eyebrow">${category}</p><h1>${title}</h1><div class="meta">${escapeHtml(dateLabel)} · Official BABS Ogunlade update</div><div class="body">${paragraphs}</div></main><footer class="site-footer"><div class="wrap"><p>© ${new Date().getFullYear()} Babatunde Sunday Ogunlade. All rights reserved.</p></div></footer></body></html>`;
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>${seoTitle} | BABS Ogunlade</title><meta name="description" content="${description}"><link rel="canonical" href="https://babatundeogunlade.com/news/${encodeURIComponent(row.slug)}.html"><meta property="og:type" content="article"><meta property="og:title" content="${title}"><meta property="og:description" content="${description}"><meta property="og:url" content="https://babatundeogunlade.com/news/${encodeURIComponent(row.slug)}.html"><link rel="stylesheet" href="/assets/styles.css"><style>.cms-article{max-width:850px;margin:0 auto;padding:52px 22px 80px}.cms-article h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.12;color:#0A2540}.cms-article .meta{color:#64748b;font-size:13px;margin:18px 0 30px}.cms-article .body{font-size:17px;line-height:1.85;color:#243244}.cms-article .body p{margin:0 0 1.25em}.cms-article .back{color:#008751;font-weight:700}</style></head><body><header class="site-header"><div class="wrap"><a class="brand" href="/"><span class="brand-mark">BABS</span><span class="brand-text"><strong>Hon. Babatunde Sunday Ogunlade</strong><span>Public Information</span></span></a><nav class="nav"><a href="/">Home</a><a href="/about.html">About</a><a href="/priorities.html">Priorities</a><a href="/press.html">Press Centre</a></nav></div></header><main class="cms-article"><a class="back" href="/press.html#news">← Back to Press Centre</a><p class="eyebrow">${category}</p><h1>${title}</h1><div class="meta">${escapeHtml(dateLabel)} · Official BABS Ogunlade update</div><div class="body">${paragraphs}</div></main><footer class="site-footer"><div class="wrap"><p>© ${new Date().getFullYear()} Babatunde Sunday Ogunlade. All rights reserved.</p></div></footer></body></html>`;
   return new Response(html,{status:200,headers:headers({"Content-Type":"text/html; charset=utf-8","Cache-Control":"public, max-age=60","Content-Security-Policy":PUBLIC_CSP,"X-Frame-Options":"DENY"})});
 }
 
