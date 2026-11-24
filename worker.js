@@ -496,7 +496,7 @@ async function publicArticlePage(env, slug) {
   const row = await env.DB.prepare(
     "SELECT a.title,a.slug,a.excerpt,a.body_markdown,a.published_at,c.name AS category FROM articles a LEFT JOIN categories c ON c.id=a.category_id WHERE a.slug=? AND a.status='published' AND (a.scheduled_at IS NULL OR a.scheduled_at<=?) LIMIT 1"
   ).bind(slug,new Date().toISOString()).first();
-  if (!row) return text("Article not found",404);
+  if (!row) return null;
   const paragraphs = String(row.body_markdown || "").split(/\n\s*\n/).map(part => part.trim()).filter(Boolean)
     .map(part => "<p>" + escapeHtml(part).replace(/\n/g,"<br>") + "</p>").join("\n");
   const title = escapeHtml(row.title);
@@ -561,7 +561,7 @@ export default {
     const url=new URL(request.url);
     if(url.pathname.startsWith("/api/")) return api(request,env);
     const articlePath=url.pathname.match(/^\/news\/([a-z0-9-]+)\.html$/);
-    if(articlePath) return publicArticlePage(env,articlePath[1]);
+    if(articlePath){const article=await publicArticlePage(env,articlePath[1]);if(article)return article;}
     const pagePath=url.pathname.match(/^\/([a-z0-9-]+)\.html$/);
     if(pagePath){const page=await publicPageBySlug(env,pagePath[1]);if(page)return page;}
     const path=resolvePath(url.pathname);
