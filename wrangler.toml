@@ -13,3 +13,4 @@ migrations_dir = "migrations"
 
 [vars]
 CONTENT_BRANCH = "cms/phase-one-audit-and-foundation"
+ADMIN_GITHUB_IDS = "351999827"
