@@ -35,7 +35,7 @@ function setView(view){
  state.view=view;
  document.querySelectorAll(".view").forEach(function(node){node.hidden=node.id!=="view-"+view;});
  document.querySelectorAll(".side-nav .nav-item").forEach(function(node){node.classList.toggle("active",node.dataset.view===view);});
- var titles={dashboard:"Overview",articles:"News & articles",pages:"Website pages",team:"Administrators",enquiries:"Website enquiries"};
+ var titles={dashboard:"Overview",articles:"News & articles",pages:"Website pages",team:"Administrators",enquiries:"Website enquiries",profile:"Profile sections",policies:"Policy priorities",navigation:"Navigation manager"};
  $("top-title").textContent=titles[view]||"Administration";
  $("sidebar").classList.remove("open");$("mobile-menu").setAttribute("aria-expanded","false");
  if(view==="dashboard")loadDashboard();
@@ -43,6 +43,9 @@ function setView(view){
  if(view==="pages")loadPages();
  if(view==="team")loadTeam();
  if(view==="enquiries")loadEnquiries();
+ if(view==="profile")loadProfile();
+ if(view==="policies")loadPolicies();
+ if(view==="navigation")loadNavigation();
 }
 function statCard(label,value,foot){return '<article class="stat-card"><div class="stat-label">'+escapeHtml(label)+'</div><div class="stat-value">'+Number(value||0).toLocaleString("en-GB")+'</div><div class="stat-foot">'+escapeHtml(foot)+'</div></article>';}
 async function loadDashboard(){
@@ -87,8 +90,8 @@ async function loadEnquiries(){
  }catch(e){$("enquiry-rows").innerHTML='<tr><td colspan="5" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
 }
 async function loadTeam(){
- $("team-rows").innerHTML='<tr><td colspan="5" class="empty-cell">Loading administrators…</td></tr>';
- try{var d=await api("/api/users");$("team-rows").innerHTML=(d.items||[]).length?d.items.map(function(u){return '<tr><td><span class="row-title">'+escapeHtml(u.display_name)+'</span></td><td>'+escapeHtml(u.email)+'</td><td>'+escapeHtml(roleNames[u.role]||u.role)+'</td><td>'+statusPill(u.status)+'</td><td>'+date(u.last_login_at)+'</td></tr>';}).join(""):'<tr><td colspan="5" class="empty-cell">No administrator accounts found.</td></tr>';}catch(e){$("team-rows").innerHTML='<tr><td colspan="5" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
+ $("team-rows").innerHTML='<tr><td colspan="6" class="empty-cell">Loading administrators…</td></tr>';
+ try{var d=await api("/api/users"),items=d.items||[];$("team-rows").innerHTML=items.length?items.map(function(u){return '<tr><td><span class="row-title">'+escapeHtml(u.display_name)+'</span></td><td>'+escapeHtml(u.email)+'</td><td>'+escapeHtml(roleNames[u.role]||u.role)+'</td><td>'+statusPill(u.status)+'</td><td>'+date(u.last_login_at)+'</td><td><select data-user-role="'+escapeHtml(u.id)+'"><option value="administrator" '+(u.role==="administrator"?"selected":"")+'>Administrator</option><option value="editor" '+(u.role==="editor"?"selected":"")+'>Editor</option><option value="author" '+(u.role==="author"?"selected":"")+'>Author</option><option value="media_manager" '+(u.role==="media_manager"?"selected":"")+'>Media manager</option><option value="viewer" '+(u.role==="viewer"?"selected":"")+'>Viewer</option><option value="super_admin" '+(u.role==="super_admin"?"selected":"")+'>Super administrator</option></select><select data-user-status="'+escapeHtml(u.id)+'"><option value="active" '+(u.status==="active"?"selected":"")+'>Active</option><option value="suspended" '+(u.status==="suspended"?"selected":"")+'>Suspended</option><option value="disabled" '+(u.status==="disabled"?"selected":"")+'>Disabled</option></select><button class="table-action" data-save-user="'+escapeHtml(u.id)+'">Save</button></td></tr>';}).join(""):'<tr><td colspan="6" class="empty-cell">No administrator accounts found.</td></tr>';}catch(e){$("team-rows").innerHTML='<tr><td colspan="6" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
 }
 async function loadCategories(){
  try{var d=await api("/api/categories");state.categories=d.items||[];$("category-select").innerHTML='<option value="">Select category</option>'+state.categories.map(function(c){return '<option value="'+escapeHtml(c.id)+'">'+escapeHtml(c.name)+'</option>';}).join("");}catch(e){$("category-select").innerHTML='<option value="">Categories unavailable</option>';}
@@ -133,6 +136,30 @@ async function submitEditor(event){
  }catch(e){$("form-error").textContent=e.message;}
  finally{button.disabled=false;button.textContent="Save content";}
 }
+
+async function loadProfile(){
+ $("profile-rows").innerHTML='<tr><td colspan="5" class="empty-cell">Loading profile sections…</td></tr>';
+ try{var d=await api("/api/profile"),items=d.items||[];$("profile-rows")._items=items;$("profile-rows").innerHTML=items.length?items.map(function(x){return '<tr><td>'+escapeHtml(x.title)+'</td><td>'+escapeHtml(x.section_key)+'</td><td>'+statusPill(x.status)+'</td><td>'+date(x.updated_at)+'</td><td><button class="table-action" data-profile-key="'+escapeHtml(x.section_key)+'">Edit</button></td></tr>';}).join(""):'<tr><td colspan="5" class="empty-cell">No profile sections saved yet.</td></tr>';}catch(e){$("profile-rows").innerHTML='<tr><td colspan="5" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
+}
+async function loadPolicies(){
+ $("policy-rows").innerHTML='<tr><td colspan="5" class="empty-cell">Loading priorities…</td></tr>';
+ try{var d=await api("/api/policies"),items=d.items||[];$("policy-rows")._items=items;$("policy-rows").innerHTML=items.length?items.map(function(x){return '<tr><td><span class="row-title">'+escapeHtml(x.title)+'</span><span class="row-sub">'+escapeHtml(x.summary||"")+'</span></td><td>'+escapeHtml(x.slug)+'</td><td>'+statusPill(x.status)+'</td><td>'+Number(x.sort_order||0)+'</td><td><button class="table-action" data-policy-id="'+escapeHtml(x.id)+'">Edit</button></td></tr>';}).join(""):'<tr><td colspan="5" class="empty-cell">No policy priorities have been created.</td></tr>';}catch(e){$("policy-rows").innerHTML='<tr><td colspan="5" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
+}
+async function loadNavigation(){try{var d=await api("/api/navigation");$("navigation-form").elements.items.value=JSON.stringify(d.items||[],null,2);}catch(e){toast(e.message);}}
+async function saveProfile(event){
+ event.preventDefault();var f=event.currentTarget,d=new FormData(f),content;
+ try{content=JSON.parse(d.get("content"));}catch(e){toast("Content must be valid JSON.");return;}
+ try{await api("/api/profile",{method:"PUT",body:JSON.stringify({sectionKey:d.get("sectionKey"),title:d.get("title"),status:d.get("status"),content:content})});toast("Profile section saved.");await loadProfile();}catch(e){toast(e.message);}
+}
+async function savePolicy(event){
+ event.preventDefault();var f=event.currentTarget,d=new FormData(f),id=d.get("id"),payload={title:d.get("title"),slug:d.get("slug"),sortOrder:Number(d.get("sortOrder")||0),status:d.get("status"),summary:d.get("summary"),bodyHtml:d.get("bodyHtml")};
+ if(payload.status==="scheduled"&&d.get("scheduledAt"))payload.scheduledAt=new Date(d.get("scheduledAt")).toISOString();
+ try{await api("/api/policies"+(id?"/"+encodeURIComponent(id):""),{method:id?"PUT":"POST",body:JSON.stringify(payload)});f.reset();f.elements.id.value="";toast("Policy priority saved.");await loadPolicies();}catch(e){toast(e.message);}
+}
+async function saveNavigation(event){
+ event.preventDefault();var items;try{items=JSON.parse(event.currentTarget.elements.items.value);}catch(e){toast("Navigation content must be valid JSON.");return;}
+ try{var d=await api("/api/navigation",{method:"PUT",body:JSON.stringify({items:items})});toast("Navigation saved ("+d.count+" links).");await loadNavigation();}catch(e){toast(e.message);}
+}
 function bind(){
  document.querySelectorAll("[data-view]").forEach(function(b){b.addEventListener("click",function(){setView(b.dataset.view);});});
  $("quick-new-article").addEventListener("click",function(){loadCategories().then(function(){openEditor("article");});});
@@ -153,6 +180,15 @@ function bind(){
   catch(e){toast(e.message);}
  });
  $("content-form").addEventListener("submit",submitEditor);
+ $("profile-form").addEventListener("submit",saveProfile);
+ $("profile-rows").addEventListener("click",function(e){var b=e.target.closest("[data-profile-key]");if(!b)return;var item=(this._items||[]).find(function(x){return x.section_key===b.dataset.profileKey;});if(!item)return;var f=$("profile-form");f.elements.sectionKey.value=item.section_key;f.elements.title.value=item.title;f.elements.status.value=item.status;try{f.elements.content.value=JSON.stringify(JSON.parse(item.content_json||"{}"),null,2);}catch(_){f.elements.content.value=item.content_json||"{}";}});
+ $("policy-form").addEventListener("submit",savePolicy);
+ $("policy-form").elements.title.addEventListener("input",function(){var s=$("policy-form").elements.slug;if(!s.dataset.touched)s.value=this.value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,120);});
+ $("policy-form").elements.slug.addEventListener("input",function(){this.dataset.touched="1";});
+ $("policy-form").elements.status.addEventListener("change",function(){$("policy-schedule-field").hidden=this.value!=="scheduled";});
+ $("policy-rows").addEventListener("click",function(e){var b=e.target.closest("[data-policy-id]");if(!b)return;var x=(this._items||[]).find(function(v){return v.id===b.dataset.policyId;});if(!x)return;var f=$("policy-form");f.elements.id.value=x.id;f.elements.title.value=x.title;f.elements.slug.value=x.slug;f.elements.slug.dataset.touched="1";f.elements.summary.value=x.summary||"";f.elements.bodyHtml.value=x.body_html||"";f.elements.status.value=x.status;f.elements.sortOrder.value=x.sort_order||0;$("policy-schedule-field").hidden=x.status!=="scheduled";});
+ $("navigation-form").addEventListener("submit",saveNavigation);
+ $("team-rows").addEventListener("click",async function(e){var b=e.target.closest("[data-save-user]");if(!b)return;var id=b.dataset.saveUser,role=this.querySelector("[data-user-role=\""+id+"\"]").value,status=this.querySelector("[data-user-status=\""+id+"\"]").value;b.disabled=true;try{await api("/api/users/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify({role:role,status:status})});toast("Administrator access updated.");await loadTeam();}catch(err){toast(err.message);}finally{b.disabled=false;}});
  $("content-status").addEventListener("change",function(){$("schedule-field").hidden=this.value!=="scheduled";});
  $("close-editor").addEventListener("click",closeEditor);$("cancel-editor").addEventListener("click",closeEditor);
  $("editor-modal").addEventListener("click",function(e){if(e.target===$("editor-modal"))closeEditor();});
