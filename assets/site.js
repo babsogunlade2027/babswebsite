@@ -132,7 +132,7 @@ fetch("/api/public/navigation",{credentials:"same-origin",cache:"no-store"}).the
 }).catch(function(){});
 if(location.pathname.endsWith("/about.html")){
  fetch("/api/public/profile",{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(d){
-  var items=d&&d.items||[],target=document.querySelector("#main .block .split");if(!items.length||!target)return;
+  var items=d&&d.items||[],target=document.querySelector("#main .block .split > div:first-child");if(!items.length||!target)return;
   var fragment=document.createDocumentFragment();items.forEach(function(item){
    var data={};try{data=JSON.parse(item.content_json||"{}");}catch(e){}
    var section=node("section","profile-cms-section");section.appendChild(node("h2","",data.heading||item.title));
