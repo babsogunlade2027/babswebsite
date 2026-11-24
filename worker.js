@@ -441,7 +441,7 @@ async function api(request, env) {
     const body=await request.json().catch(()=>null);
     const email=clean(body&&body.email,254).toLowerCase();
     const role=clean(body&&body.role,40);
-    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(email))return json({ok:false,error:"Enter a valid email address."},422);
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))return json({ok:false,error:"Enter a valid email address."},422);
     if(!["administrator","editor","author","media_manager","viewer"].includes(role))return json({ok:false,error:"Choose a valid role."},422);
     const existing=await env.DB.prepare("SELECT id FROM admin_users WHERE lower(email)=lower(?) AND status='active'").bind(email).first();
     if(existing)return json({ok:false,error:"An active account already uses this email."},409);
@@ -461,7 +461,7 @@ async function publicPageBySlug(env, slug) {
   ).bind(slug).first();
   if (!row) return null;
   const title=escapeHtml(row.title),description=escapeHtml(row.excerpt||row.title);
-  const paragraphs=String(row.body_markdown||"").split(/\\n\\s*\\n/).map(x=>x.trim()).filter(Boolean).map(x=>"<p>"+escapeHtml(x).replace(/\\n/g,"<br>")+"</p>").join("\\n");
+  const paragraphs=String(row.body_markdown||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).map(x=>"<p>"+escapeHtml(x).replace(/\n/g,"<br>")+"</p>").join("\n");
   const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>${title} | BABS Ogunlade</title><meta name="description" content="${description}"><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="site-header"><div class="wrap"><a class="brand" href="/"><span class="brand-mark">BABS</span><span class="brand-text"><strong>Hon. Babatunde Sunday Ogunlade</strong><span>Public Information</span></span></a><nav class="nav"><a href="/">Home</a><a href="/about.html">About</a><a href="/priorities.html">Priorities</a><a href="/press.html">Press Centre</a></nav></div></header><main class="cms-article"><a class="back" href="/">← Home</a><h1>${title}</h1><div class="body">${paragraphs}</div></main></body></html>`;
   return new Response(html,{status:200,headers:headers({"Content-Type":"text/html; charset=utf-8","Cache-Control":"public, max-age=60","Content-Security-Policy":PUBLIC_CSP,"X-Frame-Options":"DENY"})});
 }
@@ -541,6 +541,8 @@ export default {
     if(url.pathname.startsWith("/api/")) return api(request,env);
     const articlePath=url.pathname.match(/^\/news\/([a-z0-9-]+)\.html$/);
     if(articlePath) return publicArticlePage(env,articlePath[1]);
+    const pagePath=url.pathname.match(/^\/([a-z0-9-]+)\.html$/);
+    if(pagePath){const page=await publicPageBySlug(env,pagePath[1]);if(page)return page;}
     const path=resolvePath(url.pathname);
     if(path===null)return text("Bad path",400);
     return serveFile(path,url.pathname.startsWith("/admin"),env);
