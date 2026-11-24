@@ -43,7 +43,7 @@ The existing public site remains a static HTML/CSS/JavaScript website served by 
 - Enquiries are persisted in D1.
 - Validation, payload-size limits, honeypot, same-origin checks and hashed-IP rate limits are implemented.
 - Protected enquiry list and status-update endpoints are implemented.
-- Admin inbox displays sender, topic, message excerpt and receipt date; administrators can update status.
+- Admin inbox displays sender, topic, message excerpt and receipt date; administrators can update status.\n- Public pages can now submit enquiries without opening the visitor's mail client.
 
 ### Administrative interface
 - Responsive vanilla HTML/CSS/JavaScript dashboard at `/admin/`.
