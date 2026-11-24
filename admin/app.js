@@ -95,7 +95,7 @@ async function loadCategories(){
 }
 function openEditor(type,item){
  state.editorType=type;state.editingId=item?item.id:null;
- var form=$("content-form");form.reset();$("form-error").textContent="";
+ var form=$("content-form");form.reset();form.elements.slug.dataset.touched="";$("form-error").textContent="";
  $("editor-title").textContent=(item?"Edit ":"Create ")+(type==="article"?"article":"page");
  $("editor-kind").textContent=type==="article"?"EDITORIAL CONTENT":"WEBSITE PAGE";
  $("category-field").hidden=type!=="article";$("navigation-field").hidden=type!=="page";
