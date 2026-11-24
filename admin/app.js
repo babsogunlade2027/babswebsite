@@ -26,6 +26,7 @@ function showApp(){
  $("user-avatar").textContent=(state.user.displayName||"B").trim().charAt(0).toUpperCase();
  $("greeting-name").textContent=(state.user.displayName||"Administrator").split(" ")[0];
  $("team-nav").hidden=state.user.role!=="super_admin";
+ $("enquiries-nav").hidden=!["super_admin","administrator"].includes(state.user.role);
  var canEdit=["super_admin","administrator","editor","author"].includes(state.user.role);
  $("new-article").hidden=!canEdit;$("quick-new-article").hidden=!canEdit;
  $("new-page").hidden=!["super_admin","administrator","editor"].includes(state.user.role);
@@ -34,13 +35,14 @@ function setView(view){
  state.view=view;
  document.querySelectorAll(".view").forEach(function(node){node.hidden=node.id!=="view-"+view;});
  document.querySelectorAll(".side-nav .nav-item").forEach(function(node){node.classList.toggle("active",node.dataset.view===view);});
- var titles={dashboard:"Overview",articles:"News & articles",pages:"Website pages",team:"Administrators"};
+ var titles={dashboard:"Overview",articles:"News & articles",pages:"Website pages",team:"Administrators",enquiries:"Website enquiries"};
  $("top-title").textContent=titles[view]||"Administration";
  $("sidebar").classList.remove("open");$("mobile-menu").setAttribute("aria-expanded","false");
  if(view==="dashboard")loadDashboard();
  if(view==="articles")loadArticles();
  if(view==="pages")loadPages();
  if(view==="team")loadTeam();
+ if(view==="enquiries")loadEnquiries();
 }
 function statCard(label,value,foot){return '<article class="stat-card"><div class="stat-label">'+escapeHtml(label)+'</div><div class="stat-value">'+Number(value||0).toLocaleString("en-GB")+'</div><div class="stat-foot">'+escapeHtml(foot)+'</div></article>';}
 async function loadDashboard(){
@@ -73,6 +75,16 @@ async function loadPages(){
  try{var d=await api("/api/pages");state.pages=d.items||[];
   $("page-rows").innerHTML=state.pages.length?state.pages.map(function(p){return '<tr><td><span class="row-title">'+escapeHtml(p.title)+'</span><span class="row-sub">'+escapeHtml(p.excerpt||"")+'</span></td><td>/'+escapeHtml(p.slug)+'</td><td>'+statusPill(p.status)+'</td><td>'+(p.show_in_navigation?"Visible":"Hidden")+'</td><td><button class="table-action" data-edit-page="'+escapeHtml(p.id)+'">Edit</button></td></tr>';}).join(""):'<tr><td colspan="5" class="empty-cell">No CMS-managed pages have been created yet.</td></tr>';
  }catch(e){$("page-rows").innerHTML='<tr><td colspan="5" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
+}
+async function loadEnquiries(){
+ $("enquiry-rows").innerHTML='<tr><td colspan="5" class="empty-cell">Loading enquiries…</td></tr>';
+ try{
+  var status=$("enquiry-status").value,params=new URLSearchParams();if(status)params.set("status",status);
+  var d=await api("/api/enquiries?"+params.toString()),items=d.items||[];
+  $("enquiry-rows").innerHTML=items.length?items.map(function(x){
+   return '<tr><td><span class="row-title">'+escapeHtml(x.sender_name)+'</span><span class="row-sub">'+escapeHtml(x.sender_email||"")+'</span><span class="row-sub">'+escapeHtml(x.sender_phone||"")+'</span></td><td><span class="row-title">'+escapeHtml(x.topic)+'</span><span class="row-sub">'+escapeHtml(x.message.slice(0,180))+(x.message.length>180?"…":"")+'</span></td><td>'+date(x.received_at)+'</td><td>'+statusPill(x.status)+'</td><td><select class="enquiry-state" data-enquiry-id="'+escapeHtml(x.id)+'" aria-label="Update enquiry status"><option value="unread" '+(x.status==="unread"?"selected":"")+'>Unread</option><option value="read" '+(x.status==="read"?"selected":"")+'>Read</option><option value="in_progress" '+(x.status==="in_progress"?"selected":"")+'>In progress</option><option value="responded" '+(x.status==="responded"?"selected":"")+'>Responded</option><option value="archived" '+(x.status==="archived"?"selected":"")+'>Archived</option></select></td></tr>';
+  }).join(""):'<tr><td colspan="5" class="empty-cell">No enquiries in this view.</td></tr>';
+ }catch(e){$("enquiry-rows").innerHTML='<tr><td colspan="5" class="empty-cell">'+escapeHtml(e.message)+'</td></tr>';}
 }
 async function loadTeam(){
  $("team-rows").innerHTML='<tr><td colspan="5" class="empty-cell">Loading administrators…</td></tr>';
@@ -125,6 +137,8 @@ function bind(){
  $("article-status").addEventListener("change",loadArticles);
  $("article-rows").addEventListener("click",function(e){var b=e.target.closest("[data-edit-article]");if(b)editItem("article",b.dataset.editArticle);});
  $("page-rows").addEventListener("click",function(e){var b=e.target.closest("[data-edit-page]");if(b)editItem("page",b.dataset.editPage);});
+ $("enquiry-status").addEventListener("change",loadEnquiries);
+ $("enquiry-rows").addEventListener("change",async function(e){var select=e.target.closest("[data-enquiry-id]");if(!select)return;select.disabled=true;try{await api("/api/enquiries/"+encodeURIComponent(select.dataset.enquiryId),{method:"PATCH",body:JSON.stringify({status:select.value})});toast("Enquiry status updated.");await loadDashboard();}catch(err){toast(err.message);await loadEnquiries();}finally{select.disabled=false;}});
  $("invite-user").addEventListener("click",async function(){
   var email=window.prompt("Enter the invitee's verified GitHub email address:");
   if(!email)return;
