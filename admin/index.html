@@ -139,6 +139,8 @@
           <label class="field full">Content <span class="field-hint">Plain text / Markdown. HTML is not accepted.</span><textarea name="bodyMarkdown" rows="12" required maxlength="50000" placeholder="Write the article or page content here…"></textarea></label>
           <label class="field">SEO title<input name="seoTitle" maxlength="180" placeholder="Optional search title"></label>
           <label class="field">Meta description<input name="metaDescription" maxlength="300" placeholder="Short search description"></label>
+          <label class="field">Canonical URL<input name="canonicalUrl" type="url" maxlength="500" placeholder="https://example.com/preferred-url"></label>
+          <label class="field">Open Graph image media ID<input name="ogImageMediaId" maxlength="80" placeholder="Available after media library setup"></label>
           <label class="field">Publication status<select name="status" id="content-status"><option value="draft">Save as draft</option><option value="in_review">In review</option><option value="scheduled">Schedule publication</option><option value="published">Publish now</option><option value="archived">Archive</option></select></label>
           <label class="field" id="schedule-field" hidden>Publish date &amp; time<input type="datetime-local" name="scheduledAt"></label>
           <label class="check-field" id="navigation-field"><input type="checkbox" name="showInNavigation"> Show in website navigation</label>
