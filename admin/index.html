@@ -39,6 +39,9 @@
       <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">▦</span>Galleries <span class="soon">Next</span></div>
       <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">◎</span>Profile &amp; policies <span class="soon">Next</span></div>
       <button class="nav-item" data-view="enquiries" id="enquiries-nav"><span class="nav-icon">✉</span>Enquiries</button>
+      <button class="nav-item" data-view="profile" id="profile-nav"><span class="nav-icon">◎</span>Profile</button>
+      <button class="nav-item" data-view="policies" id="policies-nav"><span class="nav-icon">▣</span>Policy priorities</button>
+      <button class="nav-item" data-view="navigation" id="navigation-nav"><span class="nav-icon">☷</span>Navigation</button>
       <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">☷</span>Navigation &amp; SEO <span class="soon">Next</span></div>
       <div class="sidebar-bottom">
         <div class="identity"><span class="avatar" id="user-avatar">B</span><span><strong id="user-name">Administrator</strong><small id="user-role">Administrator</small></span></div>
@@ -80,10 +83,45 @@
           <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Sender</th><th>Topic &amp; message</th><th>Received</th><th>Status</th><th>Update</th></tr></thead><tbody id="enquiry-rows"><tr><td colspan="5" class="empty-cell">Loading enquiries…</td></tr></tbody></table></div></div>
         </section>
 
+
+        <section class="view" id="view-profile" hidden>
+          <div class="page-heading"><div><p class="eyebrow">CANDIDATE PROFILE</p><h1>Profile sections</h1><p class="muted">Manage structured biography and public profile content.</p></div></div>
+          <div class="panel editor-panel"><form id="profile-form" class="form-grid">
+            <label class="field">Section key<input name="sectionKey" required maxlength="60" placeholder="biography"></label>
+            <label class="field">Section title<input name="title" required maxlength="180" placeholder="Biography"></label>
+            <label class="field">Visibility<select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+            <label class="field full">Content (JSON)<textarea name="content" rows="8" required placeholder='{"heading":"Biography","paragraphs":["..."]}'></textarea></label>
+            <div class="modal-actions full"><button class="button primary" type="submit">Save profile section</button></div>
+          </form></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Section</th><th>Key</th><th>Status</th><th>Updated</th><th></th></tr></thead><tbody id="profile-rows"><tr><td colspan="5" class="empty-cell">Loading profile sections…</td></tr></tbody></table></div></div>
+        </section>
+        <section class="view" id="view-policies" hidden>
+          <div class="page-heading"><div><p class="eyebrow">FOCUS FRAMEWORK</p><h1>Policy priorities</h1><p class="muted">Manage policy commitments and their publication order.</p></div></div>
+          <div class="panel editor-panel"><form id="policy-form" class="form-grid">
+            <input type="hidden" name="id">
+            <label class="field">Title<input name="title" required maxlength="180"></label>
+            <label class="field">URL slug<input name="slug" maxlength="120"></label>
+            <label class="field">Display order<input name="sortOrder" type="number" min="0" max="9999" value="0"></label>
+            <label class="field">Status<select name="status"><option value="draft">Draft</option><option value="in_review">In review</option><option value="scheduled">Scheduled</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+            <label class="field full">Summary<textarea name="summary" rows="2" maxlength="600"></textarea></label>
+            <label class="field full">Policy content (HTML/text)<textarea name="bodyHtml" rows="8" required maxlength="30000"></textarea></label>
+            <label class="field" id="policy-schedule-field" hidden>Publish date &amp; time<input type="datetime-local" name="scheduledAt"></label>
+            <div class="modal-actions full"><button class="button primary" type="submit">Save policy priority</button><button class="button secondary" type="reset">Clear form</button></div>
+          </form></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Priority</th><th>Slug</th><th>Status</th><th>Order</th><th></th></tr></thead><tbody id="policy-rows"><tr><td colspan="5" class="empty-cell">Loading priorities…</td></tr></tbody></table></div></div>
+        </section>
+        <section class="view" id="view-navigation" hidden>
+          <div class="page-heading"><div><p class="eyebrow">PUBLIC WEBSITE</p><h1>Navigation manager</h1><p class="muted">Edit the primary navigation links. URLs must be site-relative or HTTPS.</p></div></div>
+          <div class="panel editor-panel"><form id="navigation-form" class="form-grid">
+            <label class="field full">Navigation links (JSON array)<textarea name="items" rows="12" required placeholder='[{"label":"Home","url":"/","visible":true,"target":"_self"}]'></textarea></label>
+            <div class="modal-actions full"><button class="button primary" type="submit">Save navigation</button></div>
+          </form></div>
+          <p class="notice">The saved menu is available to the CMS. Existing static navigation is not automatically replaced until the public templates are explicitly migrated to the managed menu.</p>
+        </section>
         <section class="view" id="view-team" hidden>
           <div class="page-heading"><div><p class="eyebrow">ACCESS CONTROL</p><h1>Administrators</h1><p class="muted">Review accounts currently authorised to access the CMS.</p></div><button class="button primary" id="invite-user">＋ Invite administrator</button></div>
-          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last login</th></tr></thead><tbody id="team-rows"><tr><td colspan="5" class="empty-cell">Loading administrators…</td></tr></tbody></table></div></div>
-          <p class="notice">New accounts are currently provisioned through the secure GitHub account allowlist configured in Cloudflare Worker secrets. Invitation management is not yet enabled.</p>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last login</th><th>Access controls</th></tr></thead><tbody id="team-rows"><tr><td colspan="5" class="empty-cell">Loading administrators…</td></tr></tbody></table></div></div>
+          <p class="notice">Invitations require a verified GitHub email. Role and account-status changes revoke active sessions when an account is suspended or disabled.</p>
         </section>
       </div>
     </main>
