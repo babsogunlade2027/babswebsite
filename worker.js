@@ -192,18 +192,31 @@ async function authCallback(request, env) {
         email = primary ? primary.email : "";
       }
     }
-    const allowed = allowedGithubIds(env);
-    if (!allowed.includes(String(profile.id))) return new Response(null, { status: 302, headers: headers({ Location: "/admin/?login=not-authorised", "Set-Cookie": clearState }) });
     if (!email) email = "github-" + profile.id + "@users.noreply.github.com";
+    const allowed = allowedGithubIds(env);
     let user = await env.DB.prepare("SELECT * FROM admin_users WHERE github_user_id=? LIMIT 1").bind(String(profile.id)).first();
     if (!user) {
-      const root = await env.DB.prepare("SELECT id FROM admin_users WHERE role='super_admin' AND status='active' LIMIT 1").first();
-      if (root) return new Response(null, { status: 302, headers: headers({ Location: "/admin/?login=invitation-required", "Set-Cookie": clearState }) });
-      const id = crypto.randomUUID();
-      await env.DB.prepare(
-        "INSERT INTO admin_users (id,github_user_id,email,display_name,role,status) VALUES (?,?,?,?,?,?)"
-      ).bind(id, String(profile.id), email, clean(profile.name || profile.login, 120), "super_admin", "active").run();
-      user = await env.DB.prepare("SELECT * FROM admin_users WHERE id=?").bind(id).first();
+      const invite = await env.DB.prepare(
+        "SELECT id,role FROM admin_invites WHERE lower(email)=lower(?) AND accepted_at IS NULL AND expires_at>? ORDER BY created_at DESC LIMIT 1"
+      ).bind(email,new Date().toISOString()).first();
+      if (invite) {
+        const id = crypto.randomUUID();
+        await env.DB.prepare(
+          "INSERT INTO admin_users (id,github_user_id,email,display_name,role,status) VALUES (?,?,?,?,?,?)"
+        ).bind(id,String(profile.id),email,clean(profile.name || profile.login,120),invite.role,"active").run();
+        await env.DB.prepare("UPDATE admin_invites SET accepted_at=? WHERE id=?").bind(new Date().toISOString(),invite.id).run();
+        user = await env.DB.prepare("SELECT * FROM admin_users WHERE id=?").bind(id).first();
+      } else if (allowed.includes(String(profile.id))) {
+        const root = await env.DB.prepare("SELECT id FROM admin_users WHERE role='super_admin' AND status='active' LIMIT 1").first();
+        if (root) return new Response(null, { status: 302, headers: headers({ Location: "/admin/?login=invitation-required", "Set-Cookie": clearState }) });
+        const id = crypto.randomUUID();
+        await env.DB.prepare(
+          "INSERT INTO admin_users (id,github_user_id,email,display_name,role,status) VALUES (?,?,?,?,?,?)"
+        ).bind(id,String(profile.id),email,clean(profile.name || profile.login,120),"super_admin","active").run();
+        user = await env.DB.prepare("SELECT * FROM admin_users WHERE id=?").bind(id).first();
+      } else {
+        return new Response(null, { status: 302, headers: headers({ Location: "/admin/?login=not-authorised", "Set-Cookie": clearState }) });
+      }
     }
     if (!user || user.status !== "active") return new Response(null, { status: 302, headers: headers({ Location: "/admin/?login=inactive", "Set-Cookie": clearState }) });
     const sessionToken = randomToken();
@@ -422,9 +435,36 @@ async function api(request, env) {
     const result=await env.DB.prepare("SELECT id,email,display_name,role,status,last_login_at,created_at FROM admin_users ORDER BY created_at DESC").all();
     return json({ok:true,items:result.results||[]});
   }
+  if(path==="/api/users/invite"&&request.method==="POST"){
+    if(user.role!=="super_admin")return json({ok:false,error:"Forbidden."},403);
+    const fail=await requireMutation(request,env,user);if(fail)return fail;
+    const body=await request.json().catch(()=>null);
+    const email=clean(body&&body.email,254).toLowerCase();
+    const role=clean(body&&body.role,40);
+    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(email))return json({ok:false,error:"Enter a valid email address."},422);
+    if(!["administrator","editor","author","media_manager","viewer"].includes(role))return json({ok:false,error:"Choose a valid role."},422);
+    const existing=await env.DB.prepare("SELECT id FROM admin_users WHERE lower(email)=lower(?) AND status='active'").bind(email).first();
+    if(existing)return json({ok:false,error:"An active account already uses this email."},409);
+    const inviteId=crypto.randomUUID(),expires=new Date(Date.now()+7*86400000).toISOString();
+    await env.DB.prepare("INSERT INTO admin_invites (id,email,role,token_hash,invited_by,expires_at) VALUES (?,?,?,?,?,?)")
+      .bind(inviteId,email,role,await sha256(randomToken()),user.id,expires).run();
+    await audit(env,user,"invite","admin_user",inviteId,"Invited "+email+" as "+role+".");
+    return json({ok:true,message:"Invitation created. The invitee must sign in with a verified GitHub account using this email.",expiresAt:expires},201);
+  }
   return json({ok:false,error:"Not found."},404);
 }
 
+async function publicPageBySlug(env, slug) {
+  if (!env.DB) return null;
+  const row = await env.DB.prepare(
+    "SELECT title,slug,excerpt,body_markdown,published_at FROM pages WHERE slug=? AND status='published' LIMIT 1"
+  ).bind(slug).first();
+  if (!row) return null;
+  const title=escapeHtml(row.title),description=escapeHtml(row.excerpt||row.title);
+  const paragraphs=String(row.body_markdown||"").split(/\\n\\s*\\n/).map(x=>x.trim()).filter(Boolean).map(x=>"<p>"+escapeHtml(x).replace(/\\n/g,"<br>")+"</p>").join("\\n");
+  const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>${title} | BABS Ogunlade</title><meta name="description" content="${description}"><link rel="stylesheet" href="/assets/styles.css"></head><body><header class="site-header"><div class="wrap"><a class="brand" href="/"><span class="brand-mark">BABS</span><span class="brand-text"><strong>Hon. Babatunde Sunday Ogunlade</strong><span>Public Information</span></span></a><nav class="nav"><a href="/">Home</a><a href="/about.html">About</a><a href="/priorities.html">Priorities</a><a href="/press.html">Press Centre</a></nav></div></header><main class="cms-article"><a class="back" href="/">← Home</a><h1>${title}</h1><div class="body">${paragraphs}</div></main></body></html>`;
+  return new Response(html,{status:200,headers:headers({"Content-Type":"text/html; charset=utf-8","Cache-Control":"public, max-age=60","Content-Security-Policy":PUBLIC_CSP,"X-Frame-Options":"DENY"})});
+}
 function escapeHtml(value) {
   return String(value == null ? "" : value).replace(/[&<>"']/g, ch => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
