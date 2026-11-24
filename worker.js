@@ -161,6 +161,39 @@ async function allowAuthAttempt(request, env) {
     .bind(new Date(now).toISOString(),key).run();
   return true;
 }
+async function allowRateLimit(request, env, prefix, limit, windowMs) {
+  if (!env.DB) return false;
+  const ip=request.headers.get("CF-Connecting-IP")||"unknown";
+  const key=await sha256(prefix+":"+ip);
+  const now=Date.now(),nowIso=new Date(now).toISOString();
+  const row=await env.DB.prepare("SELECT window_started_at,attempts FROM auth_rate_limits WHERE key_hash=?").bind(key).first();
+  if(!row||now-new Date(row.window_started_at).getTime()>=windowMs){
+    await env.DB.prepare("INSERT INTO auth_rate_limits (key_hash,window_started_at,attempts) VALUES (?,?,1) ON CONFLICT(key_hash) DO UPDATE SET window_started_at=excluded.window_started_at,attempts=1,updated_at=?")
+      .bind(key,nowIso,nowIso).run();return true;
+  }
+  if(Number(row.attempts)>=limit)return false;
+  await env.DB.prepare("UPDATE auth_rate_limits SET attempts=attempts+1,updated_at=? WHERE key_hash=?").bind(nowIso,key).run();
+  return true;
+}
+async function contactRoute(request,env) {
+  if(request.method!=="POST")return json({ok:false,error:"Method not allowed."},405,{Allow:"POST"});
+  if(!originOk(request))return json({ok:false,error:"Origin validation failed."},403);
+  if(!env.DB)return json({ok:false,error:"The enquiry service is temporarily unavailable."},503);
+  const type=request.headers.get("Content-Type")||"";
+  if(!type.toLowerCase().includes("application/json"))return json({ok:false,error:"Unsupported content type."},415);
+  const raw=await request.text();
+  if(raw.length>10000)return json({ok:false,error:"Message is too large."},413);
+  let body;try{body=JSON.parse(raw);}catch{return json({ok:false,error:"Invalid submission."},400);}
+  if(!body||typeof body!=="object"||Array.isArray(body))return json({ok:false,error:"Invalid submission."},400);
+  if(clean(body.website,200))return json({ok:true},201);
+  if(!await allowRateLimit(request,env,"contact",5,15*60*1000))return json({ok:false,error:"Too many submissions. Please try again later."},429,{"Retry-After":"900"});
+  const name=clean(body.name,100),email=clean(body.email,254).toLowerCase(),phone=clean(body.phone,30),topic=clean(body.topic,100)||"General enquiry",message=clean(body.message,5000);
+  if(name.length<2||!/^\S+@\S+\.\S{2,}$/.test(email)||message.length<10)return json({ok:false,error:"Please provide your name, a valid email address and a message of at least 10 characters."},422);
+  const id=crypto.randomUUID(),ip=request.headers.get("CF-Connecting-IP")||"unknown";
+  await env.DB.prepare("INSERT INTO enquiries (id,sender_name,sender_email,sender_phone,topic,message,status,source_ip_hash,user_agent) VALUES (?,?,?,?,?,?,?,?,?)")
+    .bind(id,name,email,phone,topic,message,"unread",await sha256(ip),clean(request.headers.get("User-Agent"),300)).run();
+  return json({ok:true,message:"Thank you. Your enquiry has been received."},201);
+}
 async function authStart(request, env) {
   if (request.method !== "GET") return text("Method not allowed", 405, { Allow: "GET" });
   if (!clientId(env)) return text("GitHub OAuth is not configured.", 503);
@@ -400,6 +433,7 @@ async function api(request, env) {
   if (path === "/api/auth") return authStart(request, env);
   if (path === "/api/callback") return authCallback(request, env);
   if (path === "/api/public/articles" && request.method === "GET") return publicArticles(env);
+  if (path === "/api/contact") return contactRoute(request,env);
   if (path === "/api/session" && request.method === "GET") return sessionRoute(request, env);
   if (!env.DB) return json({ ok: false, error: "CMS database binding is unavailable." }, 503);
   const auth = await requireUser(request, env);
@@ -450,6 +484,28 @@ async function api(request, env) {
     if(!can(user,"update","pages"))return json({ok:false,error:"Forbidden."},403);
     const fail=await requireMutation(request,env,user);if(fail)return fail;
     return savePage(request,env,user,pageMatch[1]);
+  }
+  if(path==="/api/enquiries"&&request.method==="GET"){
+    if(!can(user,"read","enquiries"))return json({ok:false,error:"Forbidden."},403);
+    const url=new URL(request.url),status=clean(url.searchParams.get("status"),30);
+    let sql="SELECT id,sender_name,sender_email,sender_phone,topic,message,status,received_at,updated_at FROM enquiries";
+    const params=[];
+    if(["unread","read","in_progress","responded","archived"].includes(status)){sql+=" WHERE status=?";params.push(status);}
+    sql+=" ORDER BY received_at DESC LIMIT 200";
+    const result=await env.DB.prepare(sql).bind(...params).all();
+    return json({ok:true,items:result.results||[]});
+  }
+  const enquiryMatch=path.match(/^\/api\/enquiries\/([0-9a-f-]+)$/i);
+  if(enquiryMatch&&request.method==="PATCH"){
+    if(!can(user,"update","enquiries"))return json({ok:false,error:"Forbidden."},403);
+    const fail=await requireMutation(request,env,user);if(fail)return fail;
+    const body=await request.json().catch(()=>null),status=clean(body&&body.status,30);
+    if(!["unread","read","in_progress","responded","archived"].includes(status))return json({ok:false,error:"Invalid enquiry status."},422);
+    const existing=await env.DB.prepare("SELECT id FROM enquiries WHERE id=?").bind(enquiryMatch[1]).first();
+    if(!existing)return json({ok:false,error:"Enquiry not found."},404);
+    await env.DB.prepare("UPDATE enquiries SET status=?,updated_at=? WHERE id=?").bind(status,new Date().toISOString(),enquiryMatch[1]).run();
+    await audit(env,user,"update","enquiry",enquiryMatch[1],"Changed enquiry status to "+status+".");
+    return json({ok:true});
   }
   if(path==="/api/users"&&request.method==="GET"){
     if(user.role!=="super_admin")return json({ok:false,error:"Forbidden."},403);
