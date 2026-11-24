@@ -40,3 +40,21 @@
 ## Release decision
 
 **Not approved for production.** The source and D1 schema foundation are implemented, but runtime and browser end-to-end checks remain. R2 is unavailable until enabled. The existing Worker custom domains are live, so deployment must use a separate staging Worker or a controlled cutover window.
+
+## Additional implementation pass — 24 November 2026
+
+Added feature-branch workflows:
+- Profile section CRUD with JSON validation and public About-page rendering.
+- Policy priority CRUD with safe text rendering, ordering, draft/review/scheduled/published/archived states and scheduled publication.
+- Primary navigation CRUD with site-relative/HTTPS URL validation and public rendering.
+- Press-release list and media-contact metadata editor.
+- Super Administrator role/status controls; suspension/disable revokes active sessions and the last active Super Administrator cannot be demoted or disabled.
+- Article/page canonical URL validation and optional media-library image references.
+
+Still not verified:
+- Runtime execution of the new Worker routes against D1.
+- Browser interactions and responsive layout of the new admin views.
+- GitHub OAuth, role-denial and session-revocation flows.
+- Scheduled policy publication under a real Cron invocation.
+- Public page rendering with populated profile/policy/navigation data.
+- Media upload/gallery/attachment workflows (R2 remains unavailable).
