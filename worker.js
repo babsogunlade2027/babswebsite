@@ -100,11 +100,11 @@ function slugify(value) {
 function can(user, action, resource) {
   const role = user.role;
   if (role === "super_admin") return true;
-  if (action === "read") return ["administrator", "editor", "author", "media_manager", "viewer"].includes(role);
   if (resource === "users") return false;
-  if (resource === "media") return role === "administrator" || role === "media_manager" || role === "editor";
   if (resource === "enquiries") return role === "administrator";
+  if (resource === "media") return role === "administrator" || role === "media_manager" || role === "editor";
   if (resource === "settings" || resource === "navigation") return role === "administrator";
+  if (action === "read") return ["administrator", "editor", "author", "media_manager", "viewer"].includes(role);
   if (resource === "articles") {
     if (role === "administrator" || role === "editor") return true;
     return role === "author" && (action === "create" || action === "update");
