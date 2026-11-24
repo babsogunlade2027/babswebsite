@@ -26,6 +26,9 @@ function showApp(){
  $("user-avatar").textContent=(state.user.displayName||"B").trim().charAt(0).toUpperCase();
  $("greeting-name").textContent=(state.user.displayName||"Administrator").split(" ")[0];
  $("team-nav").hidden=state.user.role!=="super_admin";
+ var canEdit=["super_admin","administrator","editor","author"].includes(state.user.role);
+ $("new-article").hidden=!canEdit;$("quick-new-article").hidden=!canEdit;
+ $("new-page").hidden=!["super_admin","administrator","editor"].includes(state.user.role);
 }
 function setView(view){
  state.view=view;
@@ -122,6 +125,14 @@ function bind(){
  $("article-status").addEventListener("change",loadArticles);
  $("article-rows").addEventListener("click",function(e){var b=e.target.closest("[data-edit-article]");if(b)editItem("article",b.dataset.editArticle);});
  $("page-rows").addEventListener("click",function(e){var b=e.target.closest("[data-edit-page]");if(b)editItem("page",b.dataset.editPage);});
+ $("invite-user").addEventListener("click",async function(){
+  var email=window.prompt("Enter the invitee's verified GitHub email address:");
+  if(!email)return;
+  var role=window.prompt("Choose a role: administrator, editor, author, media_manager or viewer","editor");
+  if(!role)return;
+  try{var result=await api("/api/users/invite",{method:"POST",body:JSON.stringify({email:email,role:role})});toast(result.message||"Invitation created.");await loadTeam();}
+  catch(e){toast(e.message);}
+ });
  $("content-form").addEventListener("submit",submitEditor);
  $("close-editor").addEventListener("click",closeEditor);$("cancel-editor").addEventListener("click",closeEditor);
  $("editor-modal").addEventListener("click",function(e){if(e.target===$("editor-modal"))closeEditor();});
