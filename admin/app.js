@@ -190,6 +190,7 @@ function bind(){
   catch(e){toast(e.message);}
  });
  $("content-form").addEventListener("submit",submitEditor);
+ document.querySelectorAll("[data-md-prefix]").forEach(function(button){button.addEventListener("click",function(){var field=$("content-form").elements.bodyMarkdown,start=field.selectionStart,end=field.selectionEnd,selected=field.value.slice(start,end),prefix=button.dataset.mdPrefix||"",suffix=button.dataset.mdSuffix||"";field.setRangeText(prefix+selected+suffix,start,end,"select");field.focus();});});
  $("profile-form").addEventListener("submit",saveProfile);
  $("profile-rows").addEventListener("click",function(e){var b=e.target.closest("[data-profile-key]");if(!b)return;var item=(this._items||[]).find(function(x){return x.section_key===b.dataset.profileKey;});if(!item)return;var f=$("profile-form");f.elements.sectionKey.value=item.section_key;f.elements.title.value=item.title;f.elements.status.value=item.status;try{f.elements.content.value=JSON.stringify(JSON.parse(item.content_json||"{}"),null,2);}catch(_){f.elements.content.value=item.content_json||"{}";}});
  $("policy-form").addEventListener("submit",savePolicy);
