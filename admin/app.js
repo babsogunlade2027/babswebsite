@@ -30,6 +30,9 @@ function showApp(){
  var canEdit=["super_admin","administrator","editor","author"].includes(state.user.role);
  $("new-article").hidden=!canEdit;$("quick-new-article").hidden=!canEdit;
  $("new-page").hidden=!["super_admin","administrator","editor"].includes(state.user.role);
+ var canManage=["super_admin","administrator","editor"].includes(state.user.role);
+ $("profile-nav").hidden=!canManage;$("policies-nav").hidden=!canManage;$("press-nav").hidden=!canManage;
+ $("navigation-nav").hidden=!["super_admin","administrator"].includes(state.user.role);
 }
 function setView(view){
  state.view=view;
