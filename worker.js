@@ -217,17 +217,13 @@ async function authCallback(request, env) {
     await env.DB.prepare(
       "INSERT INTO activity_logs (id,actor_id,action,entity_type,summary) VALUES (?,?,?,?,?)"
     ).bind(crypto.randomUUID(), user.id, "login", "session", "Administrator signed in.").run();
-    return new Response(null, {
+    const out = new Response(null, {
       status: 302,
-      headers: headers({
-        Location: "/admin/",
-        "Set-Cookie": [
-          cookieHeader(SESSION_COOKIE, sessionToken, SESSION_TTL),
-          clearState
-        ].join(", "),
-        "Cache-Control": "no-store"
-      })
+      headers: headers({ Location: "/admin/", "Cache-Control": "no-store" })
     });
+    out.headers.append("Set-Cookie", cookieHeader(SESSION_COOKIE, sessionToken, SESSION_TTL));
+    out.headers.append("Set-Cookie", clearState);
+    return out;
   } catch (error) {
     return new Response(null, { status: 302, headers: headers({ Location: "/admin/?login=error", "Set-Cookie": clearState }) });
   }
@@ -293,7 +289,8 @@ async function saveArticle(request, env, user, id = null) {
   const excerpt = clean(body.excerpt, 500);
   const bodyMarkdown = clean(body.bodyMarkdown, 50000);
   const slug = slugify(body.slug || title);
-  const status = STATES.includes(body.status) ? body.status : "draft";
+  let status = STATES.includes(body.status) ? body.status : "draft";
+  if (user.role === "author") status = "draft";
   if (title.length < 3 || !validSlug(slug)) return json({ ok: false, error: "Enter a valid title and URL slug." }, 422);
   if (!bodyMarkdown) return json({ ok: false, error: "Article body is required." }, 422);
   const categoryId = clean(body.categoryId, 80) || null;
@@ -397,7 +394,7 @@ async function api(request, env) {
     return json({ok:true,item:row});
   }
   if(articleMatch && request.method==="PUT"){
-    if(!can(user,"update","articles"))return json({ok:false,error:"Forbidden."},403);
+    if(!["super_admin","administrator","editor","author"].includes(user.role))return json({ok:false,error:"Forbidden."},403);
     const fail=await requireMutation(request,env,user);if(fail)return fail;
     return saveArticle(request,env,user,articleMatch[1]);
   }
@@ -455,7 +452,7 @@ function mime(path) {
 }
 async function serveFile(path, isAdmin, env) {
   const branch = env.CONTENT_BRANCH || CONTENT_BRANCH;
-  const rawBase = "https://raw.githubusercontent.com/" + REPOSITORY + "/" + encodeURIComponent(branch) + "/";
+  const rawBase = "https://raw.githubusercontent.com/" + REPOSITORY + "/" + branch.split("/").map(encodeURIComponent).join("/") + "/";
   for (const candidate of pathsFor(path)) {
     const target = rawBase + candidate.split("/").map(encodeURIComponent).join("/");
     const upstream = await fetch(target, { headers: { Accept: "*/*", "User-Agent": "BABS-Cloudflare-Worker" } });
