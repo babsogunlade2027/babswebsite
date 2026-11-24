@@ -410,6 +410,10 @@ async function savePage(request, env, user, id = null) {
   const bodyMarkdown = clean(body.bodyMarkdown, 50000);
   const seoTitle = clean(body.seoTitle,180);
   const metaDescription = clean(body.metaDescription,300);
+  const canonicalUrl = clean(body.canonicalUrl,500);
+  if(canonicalUrl){try{const parsed=new URL(canonicalUrl);if(parsed.protocol!=="https:")throw new Error();}catch{return json({ok:false,error:"Canonical URL must be a valid HTTPS URL."},422);}}
+  const ogImageMediaId = clean(body.ogImageMediaId,80) || null;
+  if(ogImageMediaId && !await env.DB.prepare("SELECT id FROM media WHERE id=?").bind(ogImageMediaId).first())return json({ok:false,error:"Choose a valid media-library image."},422);
   const slug = slugify(body.slug || title);
   const status = STATES.includes(body.status) ? body.status : "draft";
   if (title.length < 3 || !validSlug(slug) || !bodyMarkdown) return json({ ok: false, error: "Enter a valid title, slug and page content." }, 422);
