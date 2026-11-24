@@ -360,6 +360,12 @@ async function saveArticle(request, env, user, id = null) {
   if (user.role === "author") status = "draft";
   if (title.length < 3 || !validSlug(slug)) return json({ ok: false, error: "Enter a valid title and URL slug." }, 422);
   if (!bodyMarkdown) return json({ ok: false, error: "Article body is required." }, 422);
+  let scheduledAt=null;
+  if(status==="scheduled"){
+    const parsed=body.scheduledAt?new Date(body.scheduledAt):null;
+    if(!parsed||Number.isNaN(parsed.getTime())||parsed.getTime()<=Date.now())return json({ok:false,error:"Choose a valid future publication date and time."},422);
+    scheduledAt=parsed.toISOString();
+  }
   const categoryId = clean(body.categoryId, 80) || null;
   if (categoryId) {
     const category = await env.DB.prepare("SELECT id FROM categories WHERE id=?").bind(categoryId).first();
@@ -373,14 +379,14 @@ async function saveArticle(request, env, user, id = null) {
     const publishedAt = status === "published" ? now : null;
     await env.DB.prepare(
       "UPDATE articles SET title=?,slug=?,excerpt=?,body_markdown=?,category_id=?,status=?,published_at=COALESCE(?,published_at),scheduled_at=?,updated_at=? WHERE id=?"
-    ).bind(title,slug,excerpt,bodyMarkdown,categoryId,status,publishedAt,body.scheduledAt || null,now,id).run();
+    ).bind(title,slug,excerpt,bodyMarkdown,categoryId,status,publishedAt,scheduledAt,now,id).run();
     await audit(env,user,"update","article",id,"Updated article: "+title);
     return json({ ok: true, id });
   }
   const newId = crypto.randomUUID();
   await env.DB.prepare(
     "INSERT INTO articles (id,title,slug,excerpt,body_markdown,category_id,status,author_id,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?)"
-  ).bind(newId,title,slug,excerpt,bodyMarkdown,categoryId,status,user.id,status==="published"?now:null,body.scheduledAt||null).run();
+  ).bind(newId,title,slug,excerpt,bodyMarkdown,categoryId,status,user.id,status==="published"?now:null,scheduledAt).run();
   await audit(env,user,"create","article",newId,"Created article: "+title);
   return json({ ok: true, id: newId }, 201);
 }
@@ -399,21 +405,27 @@ async function savePage(request, env, user, id = null) {
   const slug = slugify(body.slug || title);
   const status = STATES.includes(body.status) ? body.status : "draft";
   if (title.length < 3 || !validSlug(slug) || !bodyMarkdown) return json({ ok: false, error: "Enter a valid title, slug and page content." }, 422);
+  let scheduledAt=null;
+  if(status==="scheduled"){
+    const parsed=body.scheduledAt?new Date(body.scheduledAt):null;
+    if(!parsed||Number.isNaN(parsed.getTime())||parsed.getTime()<=Date.now())return json({ok:false,error:"Choose a valid future publication date and time."},422);
+    scheduledAt=parsed.toISOString();
+  }
   const nav = body.showInNavigation === true ? 1 : 0;
   const now = new Date().toISOString();
   if (id) {
     const existing = await env.DB.prepare("SELECT id FROM pages WHERE id=?").bind(id).first();
     if (!existing) return json({ ok: false, error: "Page not found." }, 404);
     await env.DB.prepare(
-      "UPDATE pages SET title=?,slug=?,excerpt=?,body_markdown=?,status=?,show_in_navigation=?,published_at=CASE WHEN ?='published' THEN COALESCE(published_at,?) ELSE published_at END,updated_at=? WHERE id=?"
-    ).bind(title,slug,excerpt,bodyMarkdown,status,nav,status,now,now,id).run();
+      "UPDATE pages SET title=?,slug=?,excerpt=?,body_markdown=?,status=?,show_in_navigation=?,published_at=CASE WHEN ?='published' THEN COALESCE(published_at,?) ELSE published_at END,scheduled_at=?,updated_at=? WHERE id=?"
+    ).bind(title,slug,excerpt,bodyMarkdown,status,nav,status,now,scheduledAt,now,id).run();
     await audit(env,user,"update","page",id,"Updated page: "+title);
     return json({ ok: true, id });
   }
   const newId = crypto.randomUUID();
   await env.DB.prepare(
-    "INSERT INTO pages (id,title,slug,excerpt,body_markdown,status,show_in_navigation,author_id,published_at) VALUES (?,?,?,?,?,?,?,?,?)"
-  ).bind(newId,title,slug,excerpt,bodyMarkdown,status,nav,user.id,status==="published"?now:null).run();
+    "INSERT INTO pages (id,title,slug,excerpt,body_markdown,status,show_in_navigation,author_id,published_at,scheduled_at) VALUES (?,?,?,?,?,?,?,?,?,?)"
+  ).bind(newId,title,slug,excerpt,bodyMarkdown,status,nav,user.id,status==="published"?now:null,scheduledAt).run();
   await audit(env,user,"create","page",newId,"Created page: "+title);
   return json({ ok: true, id: newId }, 201);
 }
@@ -613,6 +625,16 @@ async function serveFile(path, isAdmin, env) {
   return text("Not found",404,isAdmin?{"Cache-Control":"no-store"}:{});
 }
 export default {
+  async scheduled(controller,env) {
+    if(!env.DB)return;
+    const now=new Date().toISOString();
+    const [articles,pages]=await Promise.all([
+      env.DB.prepare("UPDATE articles SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run(),
+      env.DB.prepare("UPDATE pages SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run()
+    ]);
+    const changed=Number(articles.meta?.changes||0)+Number(pages.meta?.changes||0);
+    if(changed)await env.DB.prepare("INSERT INTO activity_logs (id,action,entity_type,summary) VALUES (?,?,?,?)").bind(crypto.randomUUID(),"scheduled_publish","content","Automatically published "+changed+" scheduled content item(s).").run();
+  },
   async fetch(request,env) {
     const url=new URL(request.url);
     if(url.pathname.startsWith("/api/")) return api(request,env);
