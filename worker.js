@@ -782,7 +782,8 @@ export default {
     const now=new Date().toISOString();
     const [articles,pages]=await Promise.all([
       env.DB.prepare("UPDATE articles SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run(),
-      env.DB.prepare("UPDATE pages SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run()
+      env.DB.prepare("UPDATE pages SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run(),
+      env.DB.prepare("UPDATE policy_priorities SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run()
     ]);
     const changed=Number(articles.meta?.changes||0)+Number(pages.meta?.changes||0);
     if(changed)await env.DB.prepare("INSERT INTO activity_logs (id,action,entity_type,summary) VALUES (?,?,?,?)").bind(crypto.randomUUID(),"scheduled_publish","content","Automatically published "+changed+" scheduled content item(s).").run();
