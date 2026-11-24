@@ -108,6 +108,8 @@ function openEditor(type,item){
   form.elements.bodyMarkdown.value=item.body_markdown||"";
   form.elements.seoTitle.value=item.seo_title||"";
   form.elements.metaDescription.value=item.meta_description||"";
+  form.elements.canonicalUrl.value=item.canonical_url||"";
+  form.elements.ogImageMediaId.value=item.og_image_media_id||"";
   form.elements.status.value=item.status||"draft";
   if(type==="article")form.elements.categoryId.value=item.category_id||"";
   if(type==="page")form.elements.showInNavigation.checked=!!item.show_in_navigation;
@@ -122,7 +124,7 @@ async function editItem(type,id){
 function closeEditor(){$("editor-modal").hidden=true;}
 async function submitEditor(event){
  event.preventDefault();var form=event.currentTarget,button=$("save-content"),data=new FormData(form);
- var payload={title:data.get("title"),slug:data.get("slug"),excerpt:data.get("excerpt"),bodyMarkdown:data.get("bodyMarkdown"),seoTitle:data.get("seoTitle"),metaDescription:data.get("metaDescription"),status:data.get("status")};
+ var payload={title:data.get("title"),slug:data.get("slug"),excerpt:data.get("excerpt"),bodyMarkdown:data.get("bodyMarkdown"),seoTitle:data.get("seoTitle"),metaDescription:data.get("metaDescription"),canonicalUrl:data.get("canonicalUrl"),ogImageMediaId:data.get("ogImageMediaId"),status:data.get("status")};
  if(payload.status==="scheduled"&&data.get("scheduledAt"))payload.scheduledAt=new Date(data.get("scheduledAt")).toISOString();
  if(state.editorType==="article")payload.categoryId=data.get("categoryId");
  else payload.showInNavigation=form.elements.showInNavigation.checked;
