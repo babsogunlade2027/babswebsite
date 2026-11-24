@@ -105,9 +105,12 @@ function can(user, action, resource) {
   if (resource === "media") return role === "administrator" || role === "media_manager" || role === "editor";
   if (resource === "enquiries") return role === "administrator";
   if (resource === "settings" || resource === "navigation") return role === "administrator";
-  if (resource === "articles" || resource === "pages" || resource === "policies" || resource === "press") {
+  if (resource === "articles") {
     if (role === "administrator" || role === "editor") return true;
-    return role === "author" && action === "create";
+    return role === "author" && (action === "create" || action === "update");
+  }
+  if (resource === "pages" || resource === "policies" || resource === "press") {
+    return role === "administrator" || role === "editor";
   }
   return false;
 }
