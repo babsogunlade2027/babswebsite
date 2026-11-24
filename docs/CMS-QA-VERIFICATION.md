@@ -58,3 +58,9 @@ Still not verified:
 - Scheduled policy publication under a real Cron invocation.
 - Public page rendering with populated profile/policy/navigation data.
 - Media upload/gallery/attachment workflows (R2 remains unavailable).
+
+Additional non-mutating checks performed during this pass:
+- JavaScript syntax parsing passed for `worker.js`, `admin/app.js`, `assets/site.js` and `assets/navigation.js`.
+- D1 `PRAGMA table_info` inspection confirmed profile, policy, press, navigation, article and page columns used by the new workflows.
+- D1 read-only `EXPLAIN` checks accepted the new profile, policy, navigation, press, article/page SEO and policy update SQL.
+- No test content, administrator accounts, enquiries or navigation records were created during these checks.
