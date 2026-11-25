@@ -235,55 +235,63 @@
 
 
   /* ----------------------------------------------------------------------
-     6. Latest newsroom updates (source: /news/index.json)
+     6. Latest newsroom updates (CMS first, static archive fallback)
      ---------------------------------------------------------------------- */
   var latestNews = $('#latest-news[data-news-feed]');
   if (latestNews) {
-    fetch('/news/index.json', { headers: { 'Accept': 'application/json' } })
+    function renderLatest(items) {
+      if (!Array.isArray(items) || !items.length) throw new Error('No news items');
+      latestNews.textContent = '';
+      items.slice(0, 3).forEach(function (item) {
+        var article = document.createElement('article');
+        article.className = 'news-card p-6 reveal is-visible';
+        var meta = document.createElement('p');
+        meta.className = 'news-meta';
+        meta.textContent = [item.type, item.date].filter(Boolean).join(' · ');
+        var title = document.createElement('h3');
+        title.className = 'mt-3 text-lg font-extrabold text-[#0B1B3D] leading-snug';
+        title.textContent = item.title || 'Campaign update';
+        var summary = document.createElement('p');
+        summary.className = 'mt-3 text-sm leading-relaxed text-slate-600';
+        summary.textContent = item.summary || 'Read the Press Centre for further information.';
+        var link = document.createElement('a');
+        link.className = 'read-more';
+        link.href = '/news/' + encodeURIComponent(item.slug || '') + '.html';
+        link.textContent = item.type === 'News Report' ? 'Read full report' : 'Read full release';
+        link.setAttribute('aria-label', 'Read: ' + (item.title || 'campaign update'));
+        article.appendChild(meta);
+        article.appendChild(title);
+        article.appendChild(summary);
+        article.appendChild(link);
+        latestNews.appendChild(article);
+      });
+      latestNews.setAttribute('aria-busy', 'false');
+    }
+    fetch('/api/public/articles', { headers: { 'Accept': 'application/json' } })
       .then(function (response) {
-        if (!response.ok) throw new Error('News feed unavailable');
+        if (!response.ok) throw new Error('CMS feed unavailable');
         return response.json();
       })
-      .then(function (items) {
-        if (!Array.isArray(items) || !items.length) throw new Error('No news items');
-        latestNews.textContent = '';
-        items.slice(0, 3).forEach(function (item) {
-          var article = document.createElement('article');
-          article.className = 'news-card p-6 reveal is-visible';
-
-          var meta = document.createElement('p');
-          meta.className = 'news-meta';
-          meta.textContent = [item.type, item.date].filter(Boolean).join(' · ');
-
-          var title = document.createElement('h3');
-          title.className = 'mt-3 text-lg font-extrabold text-[#0B1B3D] leading-snug';
-          title.textContent = item.title || 'Campaign update';
-
-          var summary = document.createElement('p');
-          summary.className = 'mt-3 text-sm leading-relaxed text-slate-600';
-          summary.textContent = item.summary || 'Read the Press Centre for further information.';
-
-          var link = document.createElement('a');
-          link.className = 'read-more';
-          link.href = '/news/' + encodeURIComponent(item.slug || '') + '.html';
-          link.textContent = item.type === 'News Report' ? 'Read full report' : 'Read full release';
-          link.setAttribute('aria-label', 'Read: ' + (item.title || 'campaign update'));
-
-          article.appendChild(meta);
-          article.appendChild(title);
-          article.appendChild(summary);
-          article.appendChild(link);
-          latestNews.appendChild(article);
-        });
-        latestNews.setAttribute('aria-busy', 'false');
+      .then(function (data) {
+        if (data && Array.isArray(data.items) && data.items.length) return data.items;
+        return null;
       })
+      .catch(function () { return null; })
+      .then(function (items) {
+        if (items) return items;
+        return fetch('/news/index.json', { headers: { 'Accept': 'application/json' } })
+          .then(function (response) {
+            if (!response.ok) throw new Error('Static news feed unavailable');
+            return response.json();
+          });
+      })
+      .then(renderLatest)
       .catch(function () {
         latestNews.textContent = '';
         var fallback = document.createElement('p');
         fallback.className = 'empty md:col-span-3';
         fallback.textContent = 'The latest updates are temporarily unavailable. Please visit the Press Centre.';
         latestNews.appendChild(fallback);
-        latestNews.setAttribute('aria-busy', 'false');
       });
   }
 
