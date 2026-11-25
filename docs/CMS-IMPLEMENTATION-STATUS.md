@@ -129,29 +129,28 @@ Existing Worker settings were inspected:
 - `GITHUB_OAUTH_CLIENT_ID` is a plain-text binding.
 - `GITHUB_OAUTH_CLIENT_SECRET` is a secret binding.
 - `wrangler.toml` targets the isolated staging Worker and staging D1 placeholder; `wrangler.production.toml` targets the production Worker and D1 database.
-- `CONTENT_BRANCH` points at this feature branch.
+- `CONTENT_BRANCH=main` points at the merged production source branch.
 - `ADMIN_GITHUB_IDS` identifies the initial bootstrap GitHub account.
 - A minute Cron trigger is configured for scheduled publication.
 
-Before deployment, verify that the OAuth app callback URL includes the staging or production host being used. Preserve the existing OAuth bindings when updating the Worker.
+The existing production OAuth ID and secret bindings were inherited. The first live sign-in must confirm that the GitHub OAuth App callback is registered as `https://babatundeogunlade.com/api/callback`.
 
 ## Verification performed
 
 - JavaScript syntax parsing succeeded for `worker.js`, `admin/app.js` and `assets/site.js`.
 - D1 table inventory, migration ledger, category seed count and foreign-key check were queried directly.
-- No live browser, OAuth round-trip, file upload, visual responsive or full end-to-end publication test has yet been run. New management endpoints and public rendering were added to the feature branch but still require staging runtime tests.
+- D1 query plans, production bindings, active deployment version, domain attachments and Cron schedule were verified through the Cloudflare control plane. A live browser/OAuth round-trip, file upload and responsive visual test could not be performed from the deployment environment; the owner must complete first sign-in and runtime validation.
 - Production Worker version 21 is live; the existing DNS/custom-domain attachments were preserved.
 
-## Release gates
+## Post-deployment validation checklist
 
-Do not mark the CMS production-ready until:
-1. A separate staging Worker has the D1 binding and existing OAuth secrets configured.
-2. OAuth bootstrap and invitation flows are tested with real authorised accounts.
-3. Role-denial tests prove that Viewer/Editor/Author cannot read enquiries.
-4. Article and page draft/publish/schedule/unpublish flows pass against staging.
-5. Public Press Centre and dynamic article routes render correctly while legacy static articles still work.
-6. Contact submission and enquiry status workflow pass end-to-end.
-7. R2 is enabled and media upload validation is tested.
-8. Browser tests cover Android-sized mobile, tablet and desktop breakpoints.
-9. A D1 backup and rollback plan are confirmed.
-10. The owner approves production cutover.
+The core CMS is deployed. Complete these validation items before treating every module as fully verified:
+1. Owner completes GitHub OAuth bootstrap and confirms Super Administrator session.
+2. Test invitations, role changes and access-denial rules with real accounts.
+3. Test article/page draft, review, publish, schedule and archive workflows.
+4. Test public Press Centre and dynamic article routes while confirming legacy static articles remain available.
+5. Test public contact submission and the protected enquiries inbox.
+6. Run browser checks on Android-sized mobile, tablet and desktop.
+7. Enable and provision R2 before enabling media upload, gallery management or press attachments.
+8. Reconnect Cloudflare Workers Builds to GitHub for automatic code deployments.
+9. Retain the D1 export/Time Travel checkpoint and test the restore procedure.
