@@ -239,15 +239,13 @@
      ---------------------------------------------------------------------- */
   var latestNews = $('#latest-news[data-news-feed]');
   if (latestNews) {
-    fetch('/news/cms-articles.json', { headers: { 'Accept': 'application/json' } })
+    fetch('/news/index.json', { headers: { 'Accept': 'application/json' } })
       .then(function (response) {
         if (!response.ok) throw new Error('News feed unavailable');
         return response.json();
       })
-      .then(function (data) {
-        var items = Array.isArray(data) ? data : data.articles;
+      .then(function (items) {
         if (!Array.isArray(items) || !items.length) throw new Error('No news items');
-        items = items.filter(function (item) { return item.published !== false; });
         latestNews.textContent = '';
         items.slice(0, 3).forEach(function (item) {
           var article = document.createElement('article');
@@ -267,7 +265,7 @@
 
           var link = document.createElement('a');
           link.className = 'read-more';
-          link.href = '/press.html#story-' + encodeURIComponent(item.slug || '');
+          link.href = '/news/' + encodeURIComponent(item.slug || '') + '.html';
           link.textContent = item.type === 'News Report' ? 'Read full report' : 'Read full release';
           link.setAttribute('aria-label', 'Read: ' + (item.title || 'campaign update'));
 
