@@ -71,14 +71,15 @@ var photos=[
 ["babatunde-ogunlade-portrait-traditional-red-attire.jpg","Traditional portrait"]
 ];
 var gallery=document.getElementById("gallery");
-if(gallery){gallery.innerHTML=photos.map(function(p){return '<figure class="card"><img src="/'+p[0]+'" alt="'+p[1]+'" loading="lazy"><figcaption>'+p[1]+'</figcaption></figure>';}).join("");}
+function renderGallery(entries){if(!gallery)return;gallery.textContent="";(entries||[]).forEach(function(p){var src=String(p.image||"");if(!src.startsWith("/"))return;var figure=document.createElement("figure");figure.className="card";var img=document.createElement("img");img.src=src;img.alt=String(p.alt||p.caption||"Gallery photograph");img.loading="lazy";var caption=document.createElement("figcaption");caption.textContent=String(p.caption||p.alt||"");figure.appendChild(img);figure.appendChild(caption);gallery.appendChild(figure);});}
+if(gallery){fetch("/gallery.json",{headers:{"Accept":"application/json"}}).then(function(r){if(!r.ok)throw Error("Gallery unavailable");return r.json();}).then(function(data){renderGallery(data.photos||[]);}).catch(function(){renderGallery(photos.map(function(p){return {image:"/"+p[0],alt:p[1],caption:p[1]};}));});}
 var newsList=document.getElementById("news-list");
 if(newsList){
  var search=document.getElementById("news-search"),filter=document.getElementById("news-filter"),count=document.getElementById("news-count"),results=document.getElementById("news-results"),allArticles=[];
  function el(tag,className,text){var node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
  function renderNews(){
   var term=(search.value||"").trim().toLowerCase(),kind=filter.value;
-  var visible=allArticles.filter(function(item){var hay=[item.title,item.summary,item.type,item.source].concat(item.body||[]).join(" ").toLowerCase();return (kind==="all"||item.type===kind)&&(!term||hay.indexOf(term)!==-1);});
+  var visible=allArticles.filter(function(item){var hay=[item.title,item.summary,item.type,item.source].concat(item.body||[]).join(" ").toLowerCase();return item.published!==false&&(kind==="all"||item.type===kind)&&(!term||hay.indexOf(term)!==-1);});
   visible.sort(function(a,b){return (b.iso||"").localeCompare(a.iso||"");});
   newsList.textContent="";
   if(count)count.textContent=String(visible.length);
@@ -91,15 +92,16 @@ if(newsList){
    top.appendChild(el("time","news-date",item.date));article.appendChild(top);
    article.appendChild(el("h3","news-title",item.title));
    article.appendChild(el("p","news-summary",item.summary));
-   var read=el("a","news-read-more","Read full "+(item.type==="News Report"?"report":"release"));
-   read.href="/news/"+encodeURIComponent(item.slug)+".html";
-   read.setAttribute("aria-label","Read "+item.title);
-   article.appendChild(read);
+   var details=el("details","news-details");
+   details.appendChild(el("summary","news-read-more","Read full "+(item.type==="News Report"?"report":"release")));
+   (item.body||[]).forEach(function(paragraph){details.appendChild(el("p","news-body",paragraph));});
+   if(item.source)details.appendChild(el("p","news-source","Source: "+item.source));
+   article.appendChild(details);
    newsList.appendChild(article);
   });
   if(location.hash){var target=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(target&&target.classList.contains("news-card")){var d=target.querySelector("details");if(d)d.open=true;}}
  }
- fetch("/news/articles.json",{headers:{"Accept":"application/json"}}).then(function(response){if(!response.ok)throw new Error("News archive unavailable");return response.json();}).then(function(items){if(!Array.isArray(items))throw new Error("Invalid newsroom data");allArticles=items;renderNews();if(search)search.addEventListener("input",renderNews);if(filter)filter.addEventListener("change",renderNews);}).catch(function(){newsList.textContent="";newsList.appendChild(el("p","empty","The newsroom is temporarily unavailable. Please try again later."));if(results)results.textContent="News archive unavailable";});
+ fetch("/news/cms-articles.json",{headers:{"Accept":"application/json"}}).then(function(response){if(!response.ok)throw new Error("News archive unavailable");return response.json();}).then(function(data){var items=Array.isArray(data)?data:data.articles;if(!Array.isArray(items))throw new Error("Invalid newsroom data");allArticles=items;renderNews();if(search)search.addEventListener("input",renderNews);if(filter)filter.addEventListener("change",renderNews);}).catch(function(){newsList.textContent="";newsList.appendChild(el("p","empty","The newsroom is temporarily unavailable. Please try again later."));if(results)results.textContent="News archive unavailable";});
 }
 var hero=document.querySelector(".page-hero .wrap");
 if(hero&&!document.querySelector(".page-hero img")){var path=location.pathname;var chosen=path.indexOf("press")>=0?photos[2][0]:path.indexOf("priorities")>=0?photos[5][0]:path.indexOf("about")>=0?photos[0][0]:null;if(chosen){var img=document.createElement("img");img.src="/"+chosen;img.alt="BABS community engagement";img.loading="lazy";img.style.cssText="display:block;width:100%;max-height:330px;object-fit:cover;border-radius:14px;margin-top:24px";hero.appendChild(img);}}
