@@ -1,9 +1,9 @@
 # CMS Implementation Status
 
-**Updated:** 24 November 2026 (continued implementation)  
-**Branch:** `cms/phase-one-audit-and-foundation`  
-**Pull request:** #4 (draft)  
-**Production deployment:** Not performed
+**Updated:** 25 November 2026 (production deployment)  
+**Branch:** `main`  
+**Pull request:** [#4](https://github.com/babsogunlade2027/babswebsite/pull/4) (merged)  
+**Production deployment:** Live — Worker version 21
 
 ## Architecture retained
 
@@ -92,14 +92,43 @@ Verified against the live D1 control plane:
 | Media usage tracking | Pending | Depends on media API and reference tracking. |
 | Backup automation | Pending | Configure and test D1 backup schedule/restore procedure before production. |
 
+## Production deployment — 25 November 2026
+
+The CMS Worker is deployed to the existing production Worker `babswebsite-preview` as version `2d02b382-96ea-4473-b8a6-2588b1e2755e` (version 21), with 100% traffic assigned to the new version. Deployment ID: `ae58c406-c0b9-46d7-925c-09fdea558091`.
+
+Production custom domains remain attached and enabled:
+- `https://babatundeogunlade.com`
+- `https://www.babatundeogunlade.com`
+
+Production bindings verified:
+- D1 binding `DB` → `babs-cms-production`
+- `CONTENT_BRANCH=main`
+- `ADMIN_GITHUB_IDS=351999827`
+- Existing `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` bindings inherited from the previous Worker version.
+
+Cron trigger verified: `* * * * *` for scheduled publication.
+
+The initial Super Administrator has not yet signed in. D1 currently has 0 administrator records, 0 articles, 0 pages, 9 categories, 0 enquiries and 4 migration records. The first login from the allowlisted GitHub account bootstraps the Super Administrator.
+
+The production D1 export completed before deployment. Recovery bookmark:
+`00000008-00000000-0000512e-08fc139be4b5908af35f4fabcbbe6f50`.
+
+### GitHub automatic build connection
+
+The Worker reads its website files from the repository's `main` branch, and the production Worker deployment is linked to the merged CMS commit. However, Cloudflare Workers Builds is not yet connected for automatic deployments: the Cloudflare API reports that this account is disconnected from its Git account. The manual production deployment is live; automatic push-to-deploy requires the owner to reconnect GitHub in Cloudflare Dashboard → Workers & Pages → `babswebsite-preview` → Settings → Builds → Connect, then authorize/install the Cloudflare Workers & Pages GitHub App for `babsogunlade2027/babswebsite`.
+
+### Runtime verification boundary
+
+Cloudflare confirms the production deployment, bindings, custom-domain attachments and Cron schedule. A live browser/OAuth round-trip could not be performed from the deployment environment, so the owner must complete the first GitHub sign-in at `https://babatundeogunlade.com/admin/` and confirm the dashboard session. Media uploads and galleries remain unavailable until R2 is enabled.
+
 ## Required deployment configuration
 
-The existing Worker custom domains are attached to `babswebsite-preview`. Deploying this branch to that script would change the live website. Do not deploy until a separate staging Worker or approved maintenance window and rollback plan are established.
+The production Worker has now been deployed to `babswebsite-preview`. Use `wrangler.production.toml` for production deployments and retain `wrangler.toml` for staging only.
 
 Existing Worker settings were inspected:
 - `GITHUB_OAUTH_CLIENT_ID` is a plain-text binding.
 - `GITHUB_OAUTH_CLIENT_SECRET` is a secret binding.
-- Wrangler now targets the isolated `babswebsite-cms-staging` Worker and a staging D1 placeholder; it does not bind the production D1 database.
+- `wrangler.toml` targets the isolated staging Worker and staging D1 placeholder; `wrangler.production.toml` targets the production Worker and D1 database.
 - `CONTENT_BRANCH` points at this feature branch.
 - `ADMIN_GITHUB_IDS` identifies the initial bootstrap GitHub account.
 - A minute Cron trigger is configured for scheduled publication.
@@ -111,7 +140,7 @@ Before deployment, verify that the OAuth app callback URL includes the staging o
 - JavaScript syntax parsing succeeded for `worker.js`, `admin/app.js` and `assets/site.js`.
 - D1 table inventory, migration ledger, category seed count and foreign-key check were queried directly.
 - No live browser, OAuth round-trip, file upload, visual responsive or full end-to-end publication test has yet been run. New management endpoints and public rendering were added to the feature branch but still require staging runtime tests.
-- No production Worker, DNS, custom-domain route or public production content was changed.
+- Production Worker version 21 is live; the existing DNS/custom-domain attachments were preserved.
 
 ## Release gates
 
