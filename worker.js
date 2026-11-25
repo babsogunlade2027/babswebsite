@@ -694,7 +694,7 @@ async function publicSitemap(env) {
   const base="https://babatundeogunlade.com";
   const urls=["/","/about.html","/priorities.html","/press.html","/gallery.html","/contact.html","/manifesto.html","/privacy.html"];
   if(env.DB){
-    const [articles,pages,policies]=await Promise.all([
+    const [articles,pages]=await Promise.all([
       env.DB.prepare("SELECT slug,published_at FROM articles WHERE status='published' AND (scheduled_at IS NULL OR scheduled_at<=?)").bind(new Date().toISOString()).all(),
       env.DB.prepare("SELECT slug,published_at FROM pages WHERE status='published'").all()
     ]);
@@ -794,7 +794,7 @@ export default {
   async scheduled(controller,env) {
     if(!env.DB)return;
     const now=new Date().toISOString();
-    const [articles,pages]=await Promise.all([
+    const [articles,pages,policies]=await Promise.all([
       env.DB.prepare("UPDATE articles SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run(),
       env.DB.prepare("UPDATE pages SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run(),
       env.DB.prepare("UPDATE policy_priorities SET status='published',published_at=scheduled_at,scheduled_at=NULL,updated_at=? WHERE status='scheduled' AND scheduled_at<=?").bind(now,now).run()
