@@ -7,7 +7,7 @@
 
 | Check | Result | Evidence |
 |---|---|---|
-| Worker JavaScript syntax | Pass | Parsed with JavaScript V8 syntax check |
+| Worker JavaScript syntax | Pass | Parsed with JavaScript V8 syntax check; corrected scheduled-publishing result destructuring for policy updates |
 | Admin application JavaScript syntax | Pass | Parsed with JavaScript V8 syntax check |
 | Public site JavaScript syntax | Pass | Parsed with JavaScript V8 syntax check |
 | D1 migration ledger | Pass | Four expected migration filenames present |
@@ -16,6 +16,7 @@
 | Foreign-key integrity | Pass | `PRAGMA foreign_key_check` returned zero rows |
 | Article public query plan | Pass | SQLite EXPLAIN accepted query and schema |
 | Page public query plan | Pass | SQLite EXPLAIN accepted query and schema |
+| Homepage CMS feed integration | Pass (code review) | Homepage prefers D1 public article API and falls back to existing static news index |
 | Enquiry inbox query plan | Pass | SQLite EXPLAIN accepted query and schema |
 | Production domain safety | Pass | No Worker deployment, DNS edit or custom-domain change made |
 | R2 provisioning | Blocked | Cloudflare API returned error 10042; R2 must be enabled in dashboard |
