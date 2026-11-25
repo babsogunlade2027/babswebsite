@@ -97,3 +97,20 @@ The production D1 database was exported successfully before cutover preparation.
 The export completed successfully on 25 November 2026. The database currently contains the schema and nine seeded categories, with no administrator or editorial records.
 
 After deployment, the first login must use the allowlisted GitHub account (numeric account ID `351999827`). The first successful OAuth sign-in bootstraps the initial Super Administrator. Additional team members must be invited from the dashboard.
+
+
+## Live production state
+
+- Admin dashboard: https://babatundeogunlade.com/admin/
+- Worker: `babswebsite-preview`, version 21, 100% traffic.
+- D1 binding: `babs-cms-production`.
+- Cron: every minute for scheduled publishing.
+- GitHub source branch: `main`.
+- Initial sign-in: use the allowlisted GitHub account `babsogunlade2027` (ID `351999827`). The first successful login creates the Super Administrator.
+- Media upload and gallery features remain disabled until R2 is enabled.
+
+## Connect automatic GitHub deployments
+
+Cloudflare Workers Builds could not be connected through the API because the Cloudflare account currently reports that its Git account is disconnected. In the Cloudflare dashboard, open **Workers & Pages → babswebsite-preview → Settings → Builds → Connect**, authorize GitHub, and select `babsogunlade2027/babswebsite` on branch `main`. Use root directory `/`, no separate build step, and deploy command `npx wrangler deploy --config wrangler.production.toml`. The Worker name in the production Wrangler config already matches the live Worker. If the repository is not listed, install and authorize the **Cloudflare Workers & Pages** GitHub App for this account/repository, then reconnect.
+
+Do not enable pull-request preview deployments with the production D1 configuration; previews should use an isolated staging database.
