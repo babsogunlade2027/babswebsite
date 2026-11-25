@@ -1,6 +1,21 @@
-name = "babswebsite-preview"
+name = "babswebsite-cms-staging"
 main = "worker.js"
 compatibility_date = "2026-10-20"
 
-# OAuth credentials are managed as Cloudflare Worker secret bindings.
-# Preserve the existing CLIENT_ID and CLIENT_SECRET bindings.
+# SAFETY: this is a staging-only template. Do not bind the production D1 database here.
+# Create a separate staging D1 database, apply migrations, and replace the placeholder ID.
+# OAuth credentials remain managed as Cloudflare Worker secret bindings.
+# Preserve the existing GITHUB_OAUTH_CLIENT_ID and GITHUB_OAUTH_CLIENT_SECRET bindings.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "babs-cms-staging"
+database_id = "REPLACE_WITH_STAGING_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[vars]
+CONTENT_BRANCH = "cms/phase-one-audit-and-foundation"
+ADMIN_GITHUB_IDS = "351999827"
+
+[triggers]
+crons = ["* * * * *"]

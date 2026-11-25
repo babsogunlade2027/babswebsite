@@ -28,24 +28,35 @@
       });
     });
   }
-  var contactForm=document.querySelector('form[name="contact"][data-mailto]');
+  var contactForm=document.querySelector('form[name="contact"][data-server]');
   if(contactForm){
-    contactForm.addEventListener("submit",function(event){
+    contactForm.addEventListener("submit",async function(event){
       event.preventDefault();
       if(!contactForm.reportValidity())return;
+      var button=contactForm.querySelector('button[type="submit"]');
+      var status=document.getElementById("contact-status");
       var data=new FormData(contactForm);
-      var recipient=contactForm.getAttribute("data-mailto");
-      var subject="Website enquiry: "+(data.get("topic")||"General enquiry");
-      var body=[
-        "Name: "+(data.get("name")||""),
-        "Email: "+(data.get("email")||""),
-        "Phone: "+(data.get("phone")||"Not provided"),
-        "Topic: "+(data.get("topic")||"General enquiry"),
-        "",
-        "Message:",
-        data.get("message")||""
-      ].join("\n");
-      window.location.href="mailto:"+encodeURIComponent(recipient)+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+      var payload={
+        name:data.get("name")||"",
+        email:data.get("email")||"",
+        phone:data.get("phone")||"",
+        topic:data.get("topic")||"General enquiry",
+        message:data.get("message")||"",
+        website:data.get("website")||""
+      };
+      if(button){button.disabled=true;button.textContent="Submitting…";}
+      if(status){status.textContent="Submitting your enquiry…";status.className="form-status info";}
+      try{
+        var response=await fetch("/api/contact",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(payload),credentials:"same-origin"});
+        var result=await response.json();
+        if(!response.ok)throw new Error(result.error||"Unable to submit your enquiry.");
+        contactForm.reset();
+        if(status){status.textContent=result.message||"Thank you. Your enquiry has been received.";status.className="form-status success";}
+      }catch(error){
+        if(status){status.textContent=error.message||"Something went wrong. Please try again.";status.className="form-status error";}
+      }finally{
+        if(button){button.disabled=false;button.textContent="Submit enquiry";}
+      }
     });
   }
   document.querySelectorAll("[data-year]").forEach(function(node){
@@ -99,8 +110,45 @@ if(newsList){
   });
   if(location.hash){var target=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(target&&target.classList.contains("news-card")){var d=target.querySelector("details");if(d)d.open=true;}}
  }
- fetch("/news/articles.json",{headers:{"Accept":"application/json"}}).then(function(response){if(!response.ok)throw new Error("News archive unavailable");return response.json();}).then(function(items){if(!Array.isArray(items))throw new Error("Invalid newsroom data");allArticles=items;renderNews();if(search)search.addEventListener("input",renderNews);if(filter)filter.addEventListener("change",renderNews);}).catch(function(){newsList.textContent="";newsList.appendChild(el("p","empty","The newsroom is temporarily unavailable. Please try again later."));if(results)results.textContent="News archive unavailable";});
+ function acceptItems(items){if(!Array.isArray(items))throw new Error("Invalid newsroom data");allArticles=items;renderNews();if(search)search.addEventListener("input",renderNews);if(filter)filter.addEventListener("change",renderNews);}
+ fetch("/api/public/articles",{headers:{"Accept":"application/json"}}).then(function(response){if(!response.ok)throw new Error("CMS feed unavailable");return response.json();}).then(function(data){if(data&&Array.isArray(data.items)&&data.items.length){acceptItems(data.items);}else{return fetch("/news/articles.json",{headers:{"Accept":"application/json"}}).then(function(response){if(!response.ok)throw new Error("News archive unavailable");return response.json();}).then(acceptItems);}}).catch(function(){fetch("/news/articles.json",{headers:{"Accept":"application/json"}}).then(function(response){if(!response.ok)throw new Error("News archive unavailable");return response.json();}).then(acceptItems).catch(function(){newsList.textContent="";newsList.appendChild(el("p","empty","The newsroom is temporarily unavailable. Please try again later."));if(results)results.textContent="News archive unavailable";});});
 }
 var hero=document.querySelector(".page-hero .wrap");
 if(hero&&!document.querySelector(".page-hero img")){var path=location.pathname;var chosen=path.indexOf("press")>=0?photos[2][0]:path.indexOf("priorities")>=0?photos[5][0]:path.indexOf("about")>=0?photos[0][0]:null;if(chosen){var img=document.createElement("img");img.src="/"+chosen;img.alt="BABS community engagement";img.loading="lazy";img.style.cssText="display:block;width:100%;max-height:330px;object-fit:cover;border-radius:14px;margin-top:24px";hero.appendChild(img);}}
+})();
+
+
+(function(){
+"use strict";
+function node(tag,cls,value){var n=document.createElement(tag);if(cls)n.className=cls;if(value!==undefined)n.textContent=value;return n;}
+function paragraphs(target,value){(Array.isArray(value)?value:[value]).filter(Boolean).forEach(function(line){target.appendChild(node("p","",line));});}
+fetch("/api/public/navigation",{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+ var items=d&&d.items||[];if(!items.length)return;
+ document.querySelectorAll(".nav").forEach(function(nav){nav.replaceChildren();items.forEach(function(item){
+  var a=node("a","",item.label);a.href=item.url;if(item.target==="_blank"){a.target="_blank";a.rel="noopener noreferrer";}
+  var path=new URL(a.href,location.origin).pathname;if(path===location.pathname||((path==="/index.html"||path==="/")&&(location.pathname==="/"||location.pathname==="/index.html")))a.setAttribute("aria-current","page");
+  nav.appendChild(a);
+ });});
+}).catch(function(){});
+if(location.pathname.endsWith("/about.html")){
+ fetch("/api/public/profile",{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+  var items=d&&d.items||[],target=document.querySelector("#main .block .split > div:first-child");if(!items.length||!target)return;
+  var fragment=document.createDocumentFragment();items.forEach(function(item){
+   var data={};try{data=JSON.parse(item.content_json||"{}");}catch(e){}
+   var section=node("section","profile-cms-section");section.appendChild(node("h2","",data.heading||item.title));
+   paragraphs(section,data.paragraphs||data.body||data.text||"");
+   if(Array.isArray(data.bullets)&&data.bullets.length){var ul=node("ul","checks");data.bullets.forEach(function(x){ul.appendChild(node("li","",x));});section.appendChild(ul);}
+   fragment.appendChild(section);
+  });target.replaceChildren(fragment);
+ }).catch(function(){});
+}
+if(location.pathname.endsWith("/priorities.html")){
+ fetch("/api/public/policies",{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+  var items=d&&d.items||[],target=document.querySelector("#main .grid.g2");if(!items.length||!target)return;
+  var fragment=document.createDocumentFragment();items.forEach(function(item){
+   var card=node("article","card");card.appendChild(node("h2","",item.title));if(item.summary)card.appendChild(node("p","",item.summary));
+   var body=String(item.body_html||"").split(/\n+/).map(function(x){return x.trim();}).filter(Boolean);paragraphs(card,body);fragment.appendChild(card);
+  });target.replaceChildren(fragment);
+ }).catch(function(){});
+}
 })();

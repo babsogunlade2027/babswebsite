@@ -115,3 +115,10 @@ form button:hover,.button:hover{background:var(--babs-navy);color:#fff;text-deco
 /* Official BABS identity mark */
 .brand-mark{background:url('/babs-official-logo.svg') center/cover no-repeat!important;border:0!important;border-radius:50%!important;color:transparent!important;font-size:0!important;box-shadow:none!important;}
 .brand-mark::before,.brand-mark::after{content:none!important}
+
+/* CMS-backed contact form feedback and spam trap */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.form-status{min-height:1.3em;margin:10px 0;font-size:.9rem;line-height:1.5}
+.form-status.info{color:#0A2540}
+.form-status.success{color:#087344;font-weight:700}
+.form-status.error{color:#a32f2f;font-weight:700}

@@ -1,34 +1,162 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#0B1B3D">
-  <title>BABS Content Manager</title>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <style>
-    :root{color-scheme:light;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:#f4f6f8;color:#172033}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh}
-    .top{background:#0B1B3D;color:#fff;padding:22px clamp(20px,5vw,64px);border-bottom:4px solid #f5b301}
-    .top strong{font-size:1.05rem;letter-spacing:.08em}.top span{display:block;color:#dce5f0;font-size:.9rem;margin-top:5px}
-    main{max-width:920px;margin:48px auto;padding:0 22px}
-    .panel{background:#fff;border:1px solid #e1e7ee;border-radius:16px;padding:30px;box-shadow:0 12px 36px #10203a0c}
-    h1{margin:0 0 12px;color:#0B1B3D;font-size:clamp(1.6rem,4vw,2.2rem)}
-    p{line-height:1.65;color:#465368}.notice{border-left:4px solid #f5b301;background:#fff9e8;padding:14px 16px;margin-top:22px;font-size:.92rem}
-    a{color:#0b5d34;font-weight:650}
-  </style>
-  <script src="https://unpkg.com/decap-cms@3.8.3/dist/decap-cms.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0A2540">
+<title>BABS Ogunlade | Administration</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/admin/admin.css">
 </head>
 <body>
-  <header class="top"><strong>BABS | CONTENT MANAGEMENT</strong><span>Official website publishing desk · Ibarapa East</span></header>
-  <main>
-    <section class="panel">
-      <h1>Website content manager</h1>
-      <p>Sign in with an authorised GitHub account to manage approved news releases and gallery entries. Published content is committed to the website repository.</p>
-      <div class="notice">Administrative access is restricted. Do not publish unverified claims, private information, or material that has not been approved by the campaign office.</div>
-      <p><a href="/">Return to the public website</a></p>
+<div id="app">
+  <section class="login-wrap" id="login-view" hidden>
+    <div class="login-card">
+      <div class="brand-mark">BABS</div>
+      <p class="eyebrow">BABS OGUNLADE 2027 · ADMINISTRATION</p>
+      <h1>Publishing desk</h1>
+      <p class="muted">Secure access for authorised members of the communications and administrative team.</p>
+      <a class="button primary wide" href="/api/auth">Continue with authorised GitHub account</a>
+      <p class="fine">Access is restricted to accounts approved by the system administrator. Your sign-in is verified on the server.</p>
+      <a class="back-link" href="/">← Return to public website</a>
+      <p class="login-message" id="login-message" role="status"></p>
+    </div>
+  </section>
+
+  <div class="shell" id="admin-shell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="/admin/"><span class="brand-mark">B</span><span><strong>BABS</strong><small>ADMINISTRATION</small></span></a>
+      <div class="side-caption">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Administration">
+        <button class="nav-item active" data-view="dashboard"><span class="nav-icon">▦</span>Overview</button>
+        <button class="nav-item" data-view="articles"><span class="nav-icon">▤</span>News &amp; articles</button>
+        <button class="nav-item" data-view="pages"><span class="nav-icon">▧</span>Website pages</button>
+        <button class="nav-item" data-view="team" id="team-nav" hidden><span class="nav-icon">♙</span>Administrators</button>
+      </nav>
+      <div class="side-caption">PLATFORM</div>
+      <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">▧</span>Media library <span class="soon">Next</span></div>
+      <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">▦</span>Galleries <span class="soon">Next</span></div>
+      <div class="nav-item disabled" aria-disabled="true"><span class="nav-icon">◎</span>Profile &amp; policies <span class="soon">Next</span></div>
+      <button class="nav-item" data-view="enquiries" id="enquiries-nav"><span class="nav-icon">✉</span>Enquiries</button>
+      <button class="nav-item" data-view="profile" id="profile-nav"><span class="nav-icon">◎</span>Profile</button>
+      <button class="nav-item" data-view="policies" id="policies-nav"><span class="nav-icon">▣</span>Policy priorities</button>
+      <button class="nav-item" data-view="press" id="press-nav"><span class="nav-icon">▤</span>Press releases</button>
+      <button class="nav-item" data-view="navigation" id="navigation-nav"><span class="nav-icon">☷</span>Navigation</button>
+      <div class="sidebar-bottom">
+        <div class="identity"><span class="avatar" id="user-avatar">B</span><span><strong id="user-name">Administrator</strong><small id="user-role">Administrator</small></span></div>
+        <button class="logout" id="logout-button">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobile-menu" aria-label="Open navigation" aria-expanded="false">☰</button>
+        <div><span class="top-kicker">BABS OGUNLADE 2027</span><strong id="top-title">Overview</strong></div>
+        <a class="public-link" href="/" target="_blank" rel="noopener">View public website ↗</a>
+      </header>
+      <div class="content" id="content">
+        <section class="view" id="view-dashboard">
+          <div class="page-heading"><div><p class="eyebrow">WORKSPACE OVERVIEW</p><h1>Good day, <span id="greeting-name">Administrator</span></h1><p class="muted">Your website publishing activity at a glance.</p></div><button class="button primary" id="quick-new-article">＋ New article</button></div>
+          <div class="stats-grid" id="stats-grid" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+          <div class="dashboard-grid">
+            <section class="panel"><div class="panel-heading"><div><h2>Recent activity</h2><p>Latest recorded administration events</p></div></div><div id="activity-list" class="activity-list"><p class="muted">Loading activity…</p></div></section>
+            <section class="panel"><div class="panel-heading"><div><h2>Publishing workflow</h2><p>Content status from the CMS database</p></div></div><div id="workflow-list" class="workflow-list"><p class="muted">Loading content status…</p></div><div class="panel-foot">Counts reflect saved CMS records only.</div></section>
+          </div>
+          <section class="panel roadmap"><div class="panel-heading"><div><h2>Platform modules</h2><p>Modules are enabled as their secure storage and workflows are completed.</p></div></div><div class="module-status"><span class="status-dot live"></span><span><strong>Editorial publishing</strong><small>Articles, pages, contact enquiries and scheduling · Connected to D1</small></span><b>Available</b></div><div class="module-status"><span class="status-dot live"></span><span><strong>Profile, policy, press and navigation</strong><small>Structured editing, publication workflows and public rendering</small></span><b>Available</b></div><div class="module-status"><span class="status-dot pending"></span><span><strong>Media library and galleries</strong><small>Waiting for Cloudflare R2 to be enabled and provisioned.</small></span><b>Blocked by R2</b></div></section>
+        </section>
+
+        <section class="view" id="view-articles" hidden>
+          <div class="page-heading"><div><p class="eyebrow">EDITORIAL</p><h1>News &amp; articles</h1><p class="muted">Create, review and publish official updates.</p></div><button class="button primary" id="new-article">＋ Create article</button></div>
+          <div class="toolbar"><input id="article-search" type="search" placeholder="Search headlines or summaries"><select id="article-status"><option value="">All statuses</option><option value="published">Published</option><option value="draft">Draft</option><option value="in_review">In review</option><option value="scheduled">Scheduled</option><option value="archived">Archived</option></select></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Article</th><th>Category</th><th>Status</th><th>Last updated</th><th></th></tr></thead><tbody id="article-rows"><tr><td colspan="5" class="empty-cell">Loading articles…</td></tr></tbody></table></div></div>
+        </section>
+
+        <section class="view" id="view-pages" hidden>
+          <div class="page-heading"><div><p class="eyebrow">PUBLIC WEBSITE</p><h1>Website pages</h1><p class="muted">Manage page content and publication status.</p></div><button class="button primary" id="new-page">＋ Create page</button></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Page</th><th>URL slug</th><th>Status</th><th>Navigation</th><th></th></tr></thead><tbody id="page-rows"><tr><td colspan="5" class="empty-cell">Loading pages…</td></tr></tbody></table></div></div>
+        </section>
+
+        <section class="view" id="view-enquiries" hidden>
+          <div class="page-heading"><div><p class="eyebrow">COMMUNITY CONTACT</p><h1>Website enquiries</h1><p class="muted">Read and track messages submitted through the public contact form.</p></div></div>
+          <div class="toolbar"><select id="enquiry-status"><option value="">All messages</option><option value="unread">Unread</option><option value="read">Read</option><option value="in_progress">In progress</option><option value="responded">Responded</option><option value="archived">Archived</option></select></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Sender</th><th>Topic &amp; message</th><th>Received</th><th>Status</th><th>Update</th></tr></thead><tbody id="enquiry-rows"><tr><td colspan="5" class="empty-cell">Loading enquiries…</td></tr></tbody></table></div></div>
+        </section>
+
+
+        <section class="view" id="view-profile" hidden>
+          <div class="page-heading"><div><p class="eyebrow">CANDIDATE PROFILE</p><h1>Profile sections</h1><p class="muted">Manage structured biography and public profile content.</p></div></div>
+          <div class="panel editor-panel"><form id="profile-form" class="form-grid">
+            <label class="field">Section key<input name="sectionKey" required maxlength="60" placeholder="biography"></label>
+            <label class="field">Section title<input name="title" required maxlength="180" placeholder="Biography"></label>
+            <label class="field">Visibility<select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+            <label class="field full">Content (JSON)<textarea name="content" rows="8" required placeholder='{"heading":"Biography","paragraphs":["..."]}'></textarea></label>
+            <div class="modal-actions full"><button class="button primary" type="submit">Save profile section</button></div>
+          </form></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Section</th><th>Key</th><th>Status</th><th>Updated</th><th></th></tr></thead><tbody id="profile-rows"><tr><td colspan="5" class="empty-cell">Loading profile sections…</td></tr></tbody></table></div></div>
+        </section>
+        <section class="view" id="view-policies" hidden>
+          <div class="page-heading"><div><p class="eyebrow">FOCUS FRAMEWORK</p><h1>Policy priorities</h1><p class="muted">Manage policy commitments and their publication order.</p></div></div>
+          <div class="panel editor-panel"><form id="policy-form" class="form-grid">
+            <input type="hidden" name="id">
+            <label class="field">Title<input name="title" required maxlength="180"></label>
+            <label class="field">URL slug<input name="slug" maxlength="120"></label>
+            <label class="field">Display order<input name="sortOrder" type="number" min="0" max="9999" value="0"></label>
+            <label class="field">Status<select name="status"><option value="draft">Draft</option><option value="in_review">In review</option><option value="scheduled">Scheduled</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+            <label class="field full">Summary<textarea name="summary" rows="2" maxlength="600"></textarea></label>
+            <label class="field full">Policy content (plain text; HTML is escaped)<textarea name="bodyHtml" rows="8" required maxlength="30000"></textarea></label>
+            <label class="field" id="policy-schedule-field" hidden>Publish date &amp; time<input type="datetime-local" name="scheduledAt"></label>
+            <div class="modal-actions full"><button class="button primary" type="submit">Save policy priority</button><button class="button secondary" type="reset">Clear form</button></div>
+          </form></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Priority</th><th>Slug</th><th>Status</th><th>Order</th><th></th></tr></thead><tbody id="policy-rows"><tr><td colspan="5" class="empty-cell">Loading priorities…</td></tr></tbody></table></div></div>
+        </section>
+        <section class="view" id="view-press" hidden>
+          <div class="page-heading"><div><p class="eyebrow">MEDIA RELATIONS</p><h1>Press release details</h1><p class="muted">Manage media contact information for articles in the Press Releases category.</p></div></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Release</th><th>Status</th><th>Published</th><th>Media contact</th><th></th></tr></thead><tbody id="press-rows"><tr><td colspan="5" class="empty-cell">Loading press releases…</td></tr></tbody></table></div></div>
+          <p class="notice">File attachments become available when Cloudflare R2 is enabled and the media library is provisioned.</p>
+        </section>
+        <section class="view" id="view-navigation" hidden>
+          <div class="page-heading"><div><p class="eyebrow">PUBLIC WEBSITE</p><h1>Navigation manager</h1><p class="muted">Edit the primary navigation links. URLs must be site-relative or HTTPS.</p></div></div>
+          <div class="panel editor-panel"><form id="navigation-form" class="form-grid">
+            <label class="field full">Navigation links (JSON array)<textarea name="items" rows="12" required placeholder='[{"label":"Home","url":"/","visible":true,"target":"_self"}]'></textarea></label>
+            <div class="modal-actions full"><button class="button primary" type="submit">Save navigation</button></div>
+          </form></div>
+          <p class="notice">The saved menu is available to the CMS. Existing static navigation is not automatically replaced until the public templates are explicitly migrated to the managed menu.</p>
+        </section>
+        <section class="view" id="view-team" hidden>
+          <div class="page-heading"><div><p class="eyebrow">ACCESS CONTROL</p><h1>Administrators</h1><p class="muted">Review accounts currently authorised to access the CMS.</p></div><button class="button primary" id="invite-user">＋ Invite administrator</button></div>
+          <div class="panel table-panel"><div class="table-scroll"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last login</th><th>Access controls</th></tr></thead><tbody id="team-rows"><tr><td colspan="5" class="empty-cell">Loading administrators…</td></tr></tbody></table></div></div>
+          <p class="notice">Invitations require a verified GitHub email. Role and account-status changes revoke active sessions when an account is suspended or disabled.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="editor-modal" hidden>
+    <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+      <header class="modal-header"><div><p class="eyebrow" id="editor-kind">CONTENT EDITOR</p><h2 id="editor-title">Create article</h2></div><button class="icon-button" id="close-editor" aria-label="Close editor">×</button></header>
+      <form id="content-form">
+        <div class="form-grid">
+          <label class="field full">Title<input name="title" required maxlength="180" placeholder="Enter a clear, accurate headline"></label>
+          <label class="field">URL slug<input name="slug" maxlength="120" placeholder="generated-from-title"></label>
+          <label class="field" id="category-field">Category<select name="categoryId" id="category-select"></select></label>
+          <label class="field full">Short summary<textarea name="excerpt" rows="2" maxlength="500" placeholder="A concise introduction for the public website"></textarea></label>
+          <label class="field full">Content <span class="field-hint">Markdown editor with formatting shortcuts. HTML is not accepted.</span><div class="editor-toolbar"><button type="button" data-md-prefix="**" data-md-suffix="**">Bold</button><button type="button" data-md-prefix="*" data-md-suffix="*">Italic</button><button type="button" data-md-prefix="## " data-md-suffix="">Heading</button><button type="button" data-md-prefix="- " data-md-suffix="">List item</button><button type="button" data-md-prefix="> " data-md-suffix="">Quote</button><button type="button" data-md-prefix="[" data-md-suffix="](https://)">Link</button></div><textarea name="bodyMarkdown" rows="12" required maxlength="50000" placeholder="Write the article or page content here…"></textarea></label>
+          <label class="field">SEO title<input name="seoTitle" maxlength="180" placeholder="Optional search title"></label>
+          <label class="field">Meta description<input name="metaDescription" maxlength="300" placeholder="Short search description"></label>
+          <label class="field">Canonical URL<input name="canonicalUrl" type="url" maxlength="500" placeholder="https://example.com/preferred-url"></label>
+          <label class="field">Open Graph image media ID<input name="ogImageMediaId" maxlength="80" placeholder="Available after media library setup"></label>
+          <label class="field">Publication status<select name="status" id="content-status"><option value="draft">Save as draft</option><option value="in_review">In review</option><option value="scheduled">Schedule publication</option><option value="published">Publish now</option><option value="archived">Archive</option></select></label>
+          <label class="field" id="schedule-field" hidden>Publish date &amp; time<input type="datetime-local" name="scheduledAt"></label>
+          <label class="check-field" id="navigation-field"><input type="checkbox" name="showInNavigation"> Show in website navigation</label>
+        </div>
+        <p class="form-error" id="form-error" role="alert"></p>
+        <div class="modal-actions"><button type="button" class="button secondary" id="cancel-editor">Cancel</button><button type="submit" class="button primary" id="save-content">Save content</button></div>
+      </form>
     </section>
-  </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script src="/admin/app.js" defer></script>
 </body>
 </html>
