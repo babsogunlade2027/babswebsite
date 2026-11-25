@@ -34,7 +34,7 @@ The existing public site remains a static HTML/CSS/JavaScript website served by 
 - Server-side validation of title, slug, body and category.
 - Author role is restricted to own articles and cannot publish directly.
 - Scheduled articles and pages require a future publication time.
-- Worker Cron handler promotes scheduled content when due.
+- Worker Cron handler promotes scheduled articles, pages and policy priorities when due; the policy update result is included in the scheduled-publish activity count.
 - Only published records are returned through public content queries.
 - Published CMS articles are served on the existing `/news/{slug}.html` route. Existing static news files remain available as fallback.
 - CMS-created pages are namespaced under `/pages/{slug}.html` to avoid colliding with existing static page URLs.
@@ -57,6 +57,7 @@ The existing public site remains a static HTML/CSS/JavaScript website served by 
 - Profile section editor stores structured JSON content; published sections are rendered on the public About page.
 - Policy priority editor supports draft, review, scheduled, published and archived states; scheduled policies publish through the Worker Cron and published priorities render on the public Priorities page.
 - Primary navigation manager validates site-relative/HTTPS links and exposes the saved menu to public pages, including the homepage.
+- Homepage latest-news cards now prefer the D1-backed public article feed and fall back to the existing static newsroom feed.
 - Article and page editors now validate and store canonical URLs and optional media-library IDs for social images; canonical URLs are applied to generated public content.
 - No third-party admin JavaScript bundle is loaded.
 
