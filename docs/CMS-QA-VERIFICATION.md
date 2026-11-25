@@ -65,3 +65,13 @@ Additional non-mutating checks performed during this pass:
 - D1 `PRAGMA table_info` inspection confirmed profile, policy, press, navigation, article and page columns used by the new workflows.
 - D1 read-only `EXPLAIN` checks accepted the new profile, policy, navigation, press, article/page SEO and policy update SQL.
 - No test content, administrator accounts, enquiries or navigation records were created during these checks.
+
+
+## Additional read-only checks — 25 November 2026
+
+- Production D1 export completed successfully before deployment preparation.
+- A Time Travel bookmark was recorded for rollback.
+- Read-only `EXPLAIN QUERY PLAN` checks passed for the public newsroom query, sitemap article query and scheduled policy update statement.
+- The scheduled handler was corrected to retain all three update results (articles, pages and policy priorities), preventing a runtime reference error when the Cron fires.
+- The homepage now prefers the D1 public article API and falls back to the existing static news feed.
+- Production Worker deployment and interactive OAuth/browser testing remain release actions; no CMS data was inserted during these checks.
