@@ -84,3 +84,16 @@ Before deploying to the live Worker:
 - Use invitations for new users; do not share administrator sessions.
 - Restrict enquiry data to Super Administrators and Administrators.
 - Schedule periodic D1 backups and test restore procedures.
+
+
+## Production configuration added
+
+A separate `wrangler.production.toml` now records the live Worker name, production D1 binding, canonical content branch, initial GitHub account allowlist and one-minute Cron. The existing `wrangler.toml` remains staging-only. OAuth secrets must be inherited from the current Worker or set as Cloudflare secret bindings; they are not stored in either file.
+
+The production D1 database was exported successfully before cutover preparation. A Time Travel recovery bookmark was recorded:
+
+`00000008-00000000-0000512e-08fc139be4b5908af35f4fabcbbe6f50`
+
+The export completed successfully on 25 November 2026. The database currently contains the schema and nine seeded categories, with no administrator or editorial records.
+
+After deployment, the first login must use the allowlisted GitHub account (numeric account ID `351999827`). The first successful OAuth sign-in bootstraps the initial Super Administrator. Additional team members must be invited from the dashboard.
