@@ -4,34 +4,59 @@ backend:
   branch: main
   base_url: https://babatundeogunlade.com
   auth_endpoint: api/auth
-
 site_url: https://babatundeogunlade.com
 display_url: https://babatundeogunlade.com
 logo_url: /favicon.svg
 media_folder: "assets/img/uploads"
 public_folder: "/assets/img/uploads"
 publish_mode: editorial_workflow
-
+show_preview_links: true
 collections:
-  - name: "news"
-    label: "News & Press Releases"
-    label_singular: "News article"
-    folder: "_posts/news"
-    create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Publish Date", name: "date", widget: "datetime" }
-      - { label: "Featured Image", name: "image", widget: "image", required: false }
-      - { label: "Description", name: "description", widget: "text" }
-      - { label: "Body", name: "body", widget: "markdown" }
-  - name: "gallery"
-    label: "Gallery Entries"
-    label_singular: "Gallery entry"
-    folder: "_posts/gallery"
-    create: true
-    slug: "{{slug}}"
-    fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Image", name: "image", widget: "image" }
-      - { label: "Caption", name: "caption", widget: "string", required: false }
+  - name: newsroom
+    label: Newsroom
+    files:
+      - name: articles
+        label: News & Press Releases
+        file: news/cms-articles.json
+        format: json
+        fields:
+          - label: Articles
+            name: articles
+            widget: list
+            summary: "{{fields.title}} · {{fields.date}}"
+            collapsed: true
+            fields:
+              - { label: Headline, name: title, widget: string }
+              - { label: URL Slug, name: slug, widget: string, hint: "Use lowercase words separated by hyphens." }
+              - { label: Publication Date, name: iso, widget: date, format: YYYY-MM-DD }
+              - { label: Display Date, name: date, widget: string }
+              - { label: Content Type, name: type, widget: select, options: ["Press Release", "News Report", "Statement", "Media Update"] }
+              - { label: Category, name: category, widget: string, required: false }
+              - { label: Author / Issuing Office, name: author, widget: string, required: false }
+              - { label: SEO Description, name: metaDescription, widget: text, required: false }
+              - { label: Summary, name: summary, widget: text }
+              - { label: Featured Image, name: image, widget: image, required: false }
+              - { label: Tags, name: tags, widget: list, required: false }
+              - { label: Source / Verification Note, name: source, widget: text, required: false }
+              - label: Article Paragraphs
+                name: body
+                widget: list
+                field: { label: Paragraph, name: paragraph, widget: text }
+              - { label: Published, name: published, widget: boolean, default: true }
+  - name: gallery
+    label: Photo Gallery
+    files:
+      - name: photos
+        label: Gallery Images
+        file: gallery.json
+        format: json
+        fields:
+          - label: Gallery Entries
+            name: photos
+            widget: list
+            summary: "{{fields.caption}}"
+            collapsed: true
+            fields:
+              - { label: Image, name: image, widget: image }
+              - { label: Accessible Alt Text, name: alt, widget: string }
+              - { label: Caption, name: caption, widget: string }
