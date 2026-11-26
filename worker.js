@@ -804,6 +804,11 @@ export default {
   },
   async fetch(request,env) {
     const url=new URL(request.url);
+    if(url.pathname==="/.well-known/assetlinks.json" && request.method==="GET") {
+      const response=await serveFile(".well-known/assetlinks.json",false,env);
+      const h=new Headers(response.headers);h.set("Content-Type","application/json");
+      return new Response(response.body,{status:response.status,headers:h});
+    }
     if(url.pathname.startsWith("/api/")) return api(request,env);
     if(url.pathname==="/sitemap.xml"&&request.method==="GET")return publicSitemap(env);
     const articlePath=url.pathname.match(/^\/news\/([a-z0-9-]+)\.html$/);
