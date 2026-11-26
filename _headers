@@ -43,3 +43,7 @@
   Cache-Control: no-cache
 /admin/icons/*
   Cache-Control: public, max-age=86400
+
+/.well-known/assetlinks.json
+  Content-Type: application/json
+  Cache-Control: public, max-age=300
