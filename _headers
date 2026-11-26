@@ -42,5 +42,5 @@
   Content-Type: application/javascript
   Cache-Control: no-cache
 /admin/icons/*
-  Content-Type: image/png
+  Content-Type: image/svg+xml
   Cache-Control: public, max-age=86400
