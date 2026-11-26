@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#0A192F">
 <title>BABS Ogunlade | Administration</title>
@@ -29,7 +29,7 @@
   </section>
 
   <div class="shell" id="admin-shell" hidden>
-    <aside class="sidebar" id="sidebar">
+    <button class="button mobile-menu" id="mobile-menu" aria-controls="sidebar" aria-expanded="false" hidden>☰ Menu</button><div class="mobile-backdrop" id="mobile-backdrop"></div><aside class="sidebar" id="sidebar">
       <a class="brand" href="/admin/"><span class="brand-mark">B</span><span><strong>BABS</strong><small>ADMINISTRATION</small></span></a>
       <div class="side-caption">WORKSPACE</div>
       <nav class="side-nav" aria-label="Administration">
@@ -162,6 +162,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
 <script src="/admin/app.js" defer></script>
-<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/admin/sw.js',{scope:'/admin/'}).catch(console.error);</script>
+<script>{const b=document.getElementById('mobile-menu'),s=document.getElementById('admin-shell'),d=document.getElementById('mobile-backdrop');b.hidden=false;const close=()=>{s.classList.remove('mobile-nav-open');b.setAttribute('aria-expanded','false')};b.addEventListener('click',()=>{let open=s.classList.toggle('mobile-nav-open');b.setAttribute('aria-expanded',String(open))});d.addEventListener('click',close);document.getElementById('sidebar').addEventListener('click',e=>{if(e.target.closest('[data-view]'))close()});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()})}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/admin/sw.js',{scope:'/admin/'}).catch(console.error);</script>
 </body>
 </html>
