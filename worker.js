@@ -775,7 +775,7 @@ async function serveFile(path, isAdmin, env) {
     if (upstream.status === 404) continue;
     if (!upstream.ok) return text("Website source temporarily unavailable.",502,{ "Cache-Control":"no-store" });
     const extra = {
-      "Content-Type": mime(candidate),
+      "Content-Type": candidate === "admin/manifest.json" ? "application/manifest+json" : mime(candidate),
       "Cache-Control": isAdmin ? "no-store" : (candidate.endsWith(".html") ? "public, max-age=0, must-revalidate" : "public, max-age=300")
     };
     if (isAdmin) {
