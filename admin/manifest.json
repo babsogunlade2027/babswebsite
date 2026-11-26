@@ -1,0 +1,26 @@
+{
+  "name": "BABS Admin CMS",
+  "short_name": "BABS CMS",
+  "description": "Official Editorial & Campaign Content Management Dashboard for Hon. Babatunde Sunday Ogunlade (babatundeogunlade.com)",
+  "id": "/admin/",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0A192F",
+  "theme_color": "#0A192F",
+  "icons": [
+    {
+      "src": "/admin/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/admin/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
