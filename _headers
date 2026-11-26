@@ -34,3 +34,13 @@
 
 /index.html
   Cache-Control: public, max-age=0, must-revalidate
+
+/admin/manifest.json
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=300
+/admin/sw.js
+  Content-Type: application/javascript
+  Cache-Control: no-cache
+/admin/icons/*
+  Content-Type: image/png
+  Cache-Control: public, max-age=86400
