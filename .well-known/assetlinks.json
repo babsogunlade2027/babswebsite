@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "REPLACE_WITH_ANDROID_PACKAGE_NAME_FROM_PWABUILDER",
+      "package_name": "com.babatundeogunlade.twa",
       "sha256_cert_fingerprints": [
-        "PASTE_EXACT_SHA256_SIGNING_FINGERPRINT_FROM_PWABUILDER_HERE"
+        "B6:F5:2B:91:E2:52:F8:3A:FD:63:06:4D:2E:F9:48:50:EF:DB:63:23:A4:49:43:57:D6:C4:B5:71:01:4F:25:E4"
       ]
     }
   }
