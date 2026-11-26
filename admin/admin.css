@@ -14,3 +14,8 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 .editor-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.editor-toolbar button{border:1px solid var(--line,#dbe3e8);background:#fff;color:#0A2540;border-radius:7px;padding:6px 10px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}.editor-toolbar button:hover{border-color:#008751;background:#f1faf5}
+
+/* Mobile administration */
+@media(max-width:768px){.sidebar{transform:translateX(-100%);transition:transform .2s;overflow-y:auto;width:min(82vw,280px)}.shell.mobile-nav-open .sidebar{transform:translateX(0)}.main-area{margin-left:0;min-width:0}.topbar{height:auto;min-height:60px;padding:8px 12px}.mobile-menu{display:inline-flex!important;min-width:48px;min-height:48px}.mobile-backdrop{display:none;position:fixed;inset:0;background:#0008;z-index:9}.mobile-nav-open .mobile-backdrop{display:block}.button,.nav-item,.logout,input,select,textarea{min-height:48px;font-size:16px}.summary-grid,.stats-grid,.metrics-grid,.card-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.content,.workspace,.main-content{min-width:0;padding:12px!important}.modal{max-width:100%;overflow:auto}}
+@media(min-width:769px){.mobile-menu,.mobile-backdrop{display:none!important}}
+@media(max-width:420px){.summary-grid,.stats-grid,.metrics-grid,.card-grid{grid-template-columns:1fr!important}}
